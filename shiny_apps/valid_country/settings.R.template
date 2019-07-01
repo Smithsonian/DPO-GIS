@@ -1,0 +1,6 @@
+no_cores <- 2
+
+api_search_url <- "http://[SERVER]/api/0.1/search?string="
+api_searchfuzzy_url <- "http://[SERVER]/api/0.1/fuzzysearch?string="
+api_detail_url <- "http://[SERVER]/api/0.1/get_geom?uid="
+app_api_key <- "APIKEY"
