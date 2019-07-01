@@ -4,4 +4,4 @@ Collection of services to scrub, test, clean, and edit geographic data on a mass
 
 These are products of the [Digitization Program Office](https://dpo.si.edu/), OCIO, at the Smithsonian Institution.
 
-[logo]: dpologo.jpg "SI DPO Logo"
+![dpologo](https://user-images.githubusercontent.com/2302171/60439728-48a17b00-9be1-11e9-93ef-27f7fd4904a8.jpg)
