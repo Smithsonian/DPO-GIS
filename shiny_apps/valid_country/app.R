@@ -28,37 +28,29 @@ source("settings.R")
 ui <- fluidPage(
   # App title
   titlePanel(app_name),
-  tabsetPanel(type = "tabs",
-              tabPanel("Welcome",
-                       br(),
-                       fluidRow(
-                         column(width = 4,
-                                uiOutput("main")
-                         )
-                       )
-              ),
-              tabPanel("Country-Coordinates Validation",
-                       br(),
-                       fluidRow(
-                         column(width = 8,
-                                uiOutput("ccv_uploadcsv"),
-                                DT::dataTableOutput("ccv_table")
-                         ),
-                         column(width = 4, 
-                                uiOutput("ccv_mapgiven"),
-                                leafletOutput("ccv_leafletgiven"),
-                                br(),
-                                uiOutput("ccv_mapfixed"),
-                                leafletOutput("ccv_leafletfixed")
-                         )
-                       )
-              )
+  br(),
+  fluidRow(
+    column(width = 4,
+           uiOutput("main"),
+           uiOutput("ccv_uploadcsv")
+    )),
+    fluidRow(
+     column(width = 8,
+            DT::dataTableOutput("ccv_table")
+     ),
+     column(width = 4, 
+            uiOutput("ccv_mapgiven"),
+            leafletOutput("ccv_leafletgiven"),
+            br(),
+            uiOutput("ccv_mapfixed"),
+            leafletOutput("ccv_leafletfixed")
+     )
   ),
   hr(),
   #footer ----
-  HTML(paste0("<br><br><br><div class=\"footer navbar-fixed-bottom\" style=\"background: #FFFFFF;\"><br><p>&nbsp;&nbsp;<a href=\"http://dpo.si.edu\" target = _blank><img src=\"dpologo.jpg\"></a> | ", app_name, ", ver. ", app_ver, " | <a href=\"", github_link, "\" target = _blank>Source code</a></p></div>"))
+  HTML(paste0("<br><br><br><div class=\"footer navbar-fixed-bottom\"><br><p>&nbsp;&nbsp;<a href=\"http://dpo.si.edu\" target = _blank><img src=\"dpologo.jpg\"></a> | ", app_name, ", ver. ", app_ver, " | <a href=\"", github_link, "\" target = _blank>Source code</a></p></div>"))
+  
 )
-
 
 
 #Server----
@@ -73,10 +65,15 @@ server <- function(input, output, session) {
   
   #main----
   output$main <- renderUI({
-    if (is.null(input$infiles)){
+    if (is.null(input$ccv_csvinput)){
       shinyWidgets::panel(
-        p("To use this app, upload a csv or Excel (xlsx) file to find the spatial matches."),
-        p("This app was made by the Digitization Program Office, OCIO."),
+        p("To use this app, upload a csv or Excel (xlsx) file to find the spatial matches. The file must have these columns:"),
+        HTML("<ul>
+              <li>id</li>
+              <li>decimallatitude</li>
+              <li>decimallongitude</li>
+              <li>country</li>
+             </ul>"),
         heading = "Welcome",
         status = "primary"
       )
@@ -89,6 +86,11 @@ server <- function(input, output, session) {
   output$ccv_uploadcsv <- renderUI({
     if (is.null(input$ccv_csvinput)){
       tagList(
+        selectInput("countrycode", "Countries are coded using:",
+                    list(`ISO-2 character` = "iso2c",
+                         `ISO-3 character` = "iso3c",
+                         `Full name` = "country.name")
+        ),
         fileInput("ccv_csvinput", "Upload an Input File",
                   multiple = FALSE,
                   accept = c("text/csv",
@@ -107,44 +109,9 @@ server <- function(input, output, session) {
   output$ccv_table <- DT::renderDataTable({
     
     req(input$ccv_csvinput)
-    #Read Upload
-    filename_to_check <- input$ccv_csvinput$name
-    ext_to_check <- stringr::str_split(filename_to_check, '[.]')[[1]]
-    ext_to_check <- ext_to_check[length(ext_to_check)]
-    
-    if (ext_to_check == "csv"){
-      #Read CSV file----
-      ccv_csvinput <<- read.csv(input$ccv_csvinput$datapath, header = TRUE, stringsAsFactors = FALSE)
+    country_code <- input$countrycode
       
-      # Process any error messages
-      if (class(ccv_csvinput) == "try-error"){
-        flog.error(paste0("Error reading CSV: ", filename_to_check), name = "csv")
-        output$error_msg <- renderUI({
-          HTML(paste0("<br><div class=\"alert alert-danger\" role=\"alert\">File ", filename_to_check, " does not appear to be a valid file. Please reload the application and try again.</div>"))
-        })
-        req(FALSE)
-      }
-    }else if (ext_to_check == "xlsx"){
-      #Read XLSX file----
-      try(ccv_csvinput <<- openxlsx::read.xlsx(input$ccv_csvinput$datapath, sheet = 1, check.names = TRUE), silent = TRUE)
-      
-      if (exists("ccv_csvinput") == FALSE){
-        flog.error(paste0("Error reading Excel: ", filename_to_check), name = "xlsx")
-        output$error_msg <- renderUI({
-          HTML(paste0("<br><div class=\"alert alert-danger\" role=\"alert\">File ", filename_to_check, " does not appear to be a valid file. Please reload the application and try again.</div>"))
-        })
-        req(FALSE)
-      }
-    }else{
-      #Some other file or there was a problem
-      flog.error(paste0("Error reading file: ", filename_to_check), name = "csv")
-      output$error_msg <- renderUI({
-        HTML("<br><div class=\"alert alert-danger\" role=\"alert\">File must be a valid and have the extension csv or xlsx. Please reload the application and try again.</div>")
-      })
-      req(FALSE)
-    }
-    
-    ccv_csvdata <<- ccv_csvinput
+    ccv_csvdata <<- read_inputfile(input$ccv_csvinput$name, input$ccv_csvinput$datapath)
     
     results_table <- data.frame(matrix(nrow = 0, ncol = 8, data = NA))
     
@@ -166,12 +133,12 @@ server <- function(input, output, session) {
     #Export data to cluster
     clusterExport(cl=cl, varlist=c("ccv_csvdata", "countrycheck", "api_host", "api_ver", "query_api", "apikey"), envir=environment())
     
-    countrycheck_gbif <- function(i){
+    countrycheck_data <- function(i){
       library(jsonlite)
       library(futile.logger)
       library(countrycode)
       
-      res <- countrycheck(as.integer(ccv_csvdata$id[i]), ccv_csvdata$decimalLatitude[i], ccv_csvdata$decimalLongitude[i], ccv_csvdata$countryCode[i], "iso2c", apikey)
+      res <- countrycheck(as.integer(ccv_csvdata$id[i]), ccv_csvdata$decimallatitude[i], ccv_csvdata$decimallongitude[i], ccv_csvdata$country[i], country_code, apikey)
       return(res)
     }
     
@@ -200,7 +167,7 @@ server <- function(input, output, session) {
       cat(paste(from_row, to_row, '\n'))
       cat(paste0("Querying API (", round(((s/steps) * 100), 1), "% completed)\n"))
       
-      res <- parLapply(cl, seq(from_row, to_row), countrycheck_gbif)
+      res <- parLapply(cl, seq(from_row, to_row), countrycheck_data)
       progress_val <- (s * progress_steps) + 0.1
       progress0$set(value = progress_val, message = paste0("Querying API (", round(((s/steps) * 100), 1), "% completed)"))
       results_p <- c(results_p, res)
@@ -241,89 +208,6 @@ server <- function(input, output, session) {
   
   
   
-  # #downloadcsv1----
-  # output$downloadcsv1 <- downloadHandler(
-  #   #Downloadable csv of results
-  #   filename = function() {
-  #     paste("files_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".md5", sep = "")
-  #   },
-  #   content = function(file) {
-  #     write.table(md5_files, file, row.names = FALSE, col.names = FALSE, quote = FALSE, sep = '\t')
-  #   }
-  # )
-  # 
-  
-  
-  # #downloadData ----
-  # output$downloadData <- renderUI({
-  #   
-  #   req(input$infiles)
-  #   
-  #   shinyWidgets::panel(
-  #     HTML("<p>Download a file with the filenames and MD5 hashes:</p>"),
-  #     br(),
-  #     HTML("<div class=\"btn-toolbar\">"),
-  #     downloadButton("downloadcsv1", "Download md5 file", class = "btn-success"),
-  #     HTML("</div>"),
-  #     heading = "MD5 file",
-  #     status = "primary"
-  #   )
-  # })
-  
-  
-  
-  
-  #choose_row----
-  # output$choose_row <- renderUI({
-  #   req(input$csvinput)
-  #   #Read Upload
-  #   filename_to_check <- input$csvinput$name
-  #   ext_to_check <- stringr::str_split(filename_to_check, '[.]')[[1]]
-  #   ext_to_check <- ext_to_check[length(ext_to_check)]
-  #   
-  #   if (ext_to_check == "csv"){
-  #     #Read CSV file----
-  #     csvinput <<- read.csv(input$csvinput$datapath, header = TRUE, stringsAsFactors = FALSE)
-  #     
-  #     # Process any error messages
-  #     if (class(csvinput) == "try-error"){
-  #       flog.error(paste0("Error reading CSV: ", filename_to_check), name = "csv")
-  #       output$error_msg <- renderUI({
-  #         HTML(paste0("<br><div class=\"alert alert-danger\" role=\"alert\">File ", filename_to_check, " does not appear to be a valid file. Please reload the application and try again.</div>"))
-  #       })
-  #       req(FALSE)
-  #     }
-  #   }else if (ext_to_check == "xlsx"){
-  #     #Read XLSX file----
-  #     try(csvinput <<- openxlsx::read.xlsx(input$csvinput$datapath, sheet = 1, check.names = TRUE), silent = TRUE)
-  #     
-  #     if (exists("csvinput") == FALSE){
-  #       flog.error(paste0("Error reading Excel: ", filename_to_check), name = "xlsx")
-  #       output$error_msg <- renderUI({
-  #         HTML(paste0("<br><div class=\"alert alert-danger\" role=\"alert\">File ", filename_to_check, " does not appear to be a valid file. Please reload the application and try again.</div>"))
-  #       })
-  #       req(FALSE)
-  #     }
-  #   }else{
-  #     #Some other file or there was a problem
-  #     flog.error(paste0("Error reading file: ", filename_to_check), name = "csv")
-  #     output$error_msg <- renderUI({
-  #       HTML("<br><div class=\"alert alert-danger\" role=\"alert\">File must be a valid and have the extension csv or xlsx. Please reload the application and try again.</div>")
-  #     })
-  #     req(FALSE)
-  #   }
-  #   
-  #   csvdata <<- csvinput
-  #   
-  #   choices <- data.frame(csvdata$id, paste0(csvdata$locality, ' - ', csvdata$country))
-  #   names(choices) <- c("id", "location")
-  #   obj_list <- as.list(choices$id)
-  #   names(obj_list) <- choices$id
-  #   
-  #   selectInput(inputId = "row", label = "Select a row:", choices = obj_list, width = "100%", multiple = FALSE, selectize = FALSE)
-  # })
-  
-  
   
   #ccv_mapgiven ----
   output$ccv_mapgiven <- renderUI({
@@ -352,14 +236,15 @@ server <- function(input, output, session) {
     
     lng_dd <- as.numeric(this_row$longitude)
     lat_dd <- as.numeric(this_row$latitude)
-    
+
     if (!is.na(lng_dd) && !is.na(lat_dd)){
       leaflet() %>%
         addProviderTiles(providers$OpenStreetMap.HOT,
                          options = providerTileOptions(noWrap = TRUE)
         ) %>%
         addMarkers(data = cbind(lng_dd, lat_dd)) %>%
-        setView(lng = lng_dd, lat = lat_dd, zoom = 08) %>%
+        addAwesomeMarkers(data = cbind(lng_dd, lat_dd), popup = paste0('Lon: ', lng_dd, '<br>Lat: ', lat_dd)) %>%
+        setView(lng = lng_dd, lat = lat_dd, zoom = 04) %>%
         addScaleBar()
     }
   })
@@ -372,7 +257,7 @@ server <- function(input, output, session) {
     req(input$ccv_table_rows_selected)
     
     this_row <- results[input$ccv_table_rows_selected, ]
-    
+    print(this_row)
     lng_dd <- this_row$matched_longitude
     lat_dd <- this_row$matched_latitude
     lng_dd1 <- this_row$longitude
@@ -403,8 +288,8 @@ server <- function(input, output, session) {
         addProviderTiles(providers$OpenStreetMap.HOT,
                          options = providerTileOptions(noWrap = TRUE)
         ) %>%
-        addMarkers(data = cbind(lng_dd, lat_dd)) %>%
-        setView(lng = lng_dd, lat = lat_dd, zoom = 08) %>%
+        addAwesomeMarkers(data = cbind(as.numeric(lng_dd), as.numeric(lat_dd)), popup = paste0('Lon: ', lng_dd, '<br>Lat: ', lat_dd)) %>%
+        setView(lng = as.numeric(lng_dd), lat = as.numeric(lat_dd), zoom = 04) %>%
         addScaleBar()
     }
   })

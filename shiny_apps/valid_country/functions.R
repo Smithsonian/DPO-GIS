@@ -1,12 +1,7 @@
 
 
 query_api <- function(url, apikey){
-  api_req <- httr::GET(url = URLencode(url),
-                       httr::add_headers(
-                         "X-Api-Key" = apikey
-                       )
-  )
-  
+  api_req <- httr::GET(url = URLencode(url), httr::add_headers("X-Api-Key" = apikey))
   results <- httr::content(api_req, as = "text", encoding = "UTF-8")
   return(results)
 }
@@ -133,6 +128,13 @@ countrycheck <- function(id, latitude, longitude, country, countryformat = "iso2
       }
     }
   }
+  
+  if (!is.na(country_match)){
+    country_match = countrycode(country_match, origin = "iso3c", destination = "country.name")
+  }else{
+    country_match = NA
+  }
+  
   return(list(id = id, latitude = latitude, longitude = longitude, country = country, country_match = country_match, latitude_match = latitude_match, longitude_match = longitude_match, note = note))
 }
 
@@ -180,3 +182,45 @@ wikidata_geo <- function(country, stateprovince, instance = NA){
 }
 
 
+
+
+read_inputfile <- function(filename, file_location){
+  #Read Upload
+  ext_to_check <- stringr::str_split(filename, '[.]')[[1]]
+  ext_to_check <- ext_to_check[length(ext_to_check)]
+  
+  if (ext_to_check == "csv"){
+    #Read CSV file----
+    input_data <- read.csv(file_location, header = TRUE, stringsAsFactors = FALSE)
+    
+    # Process any error messages
+    if (class(input_data) == "try-error"){
+      stop("The file does not appear to be a valid. Please reload the application and try again.")
+    }
+  }else if (ext_to_check == "xlsx"){
+    #Read XLSX file----
+    try(input_data <- openxlsx::read.xlsx(file_location, sheet = 1, check.names = TRUE), silent = TRUE)
+    
+    if (exists("input_data") == FALSE){
+      stop("The file does not appear to be a valid. Please reload the application and try again.")
+    }
+  }else{
+    stop("The file must be a valid CSV or Excel file and have the extension .csv or .xlsx. Please reload the application and try again.")
+  }
+  
+  #Check if required input columns are present
+  if(!"country" %in% colnames(input_data)){
+    stop("The file must include the column 'country'. Please reload the application and try again.")
+  }
+  if(!"decimallatitude" %in% colnames(input_data)){
+    stop("The file must include the column 'decimallatitude'. Please reload the application and try again.")
+  }
+  if(!"decimallongitude" %in% colnames(input_data)){
+    stop("The file must include the column 'decimallongitude'. Please reload the application and try again.")
+  }
+  if(!"id" %in% colnames(input_data)){
+    stop("The file must include the column 'id'. Please reload the application and try again.")
+  }
+  
+  return(input_data)
+}
