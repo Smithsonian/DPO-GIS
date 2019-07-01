@@ -52,6 +52,7 @@ countrycheck <- function(id, latitude, longitude, country, countryformat = "iso2
       }
     }
     
+    #Check for latitude sign
     if (!exists("note")){
       country_query1 <- fromJSON(query_api(paste0('http://', api_host, '/api/', api_ver, '/gadm?lat=', -lat_dd, '&lng=', lng_dd), apikey))
       if (!is.null(country_query1$intersection)){
@@ -65,6 +66,7 @@ countrycheck <- function(id, latitude, longitude, country, countryformat = "iso2
         }
       }
       
+      #Check for longitude sign
       if (!exists("note")){
         country_query1 <- fromJSON(query_api(paste0('http://', api_host, '/api/', api_ver, '/gadm?lat=', lat_dd, '&lng=', -lng_dd), apikey))
         if (!is.null(country_query1$intersection)){
@@ -73,12 +75,13 @@ countrycheck <- function(id, latitude, longitude, country, countryformat = "iso2
             if (country_check == country_match){
               note <- paste0('Longitude has the wrong sign, should be ', -lng_dd)
               latitude_match <- lat_dd
-              longitude_match <- lng_dd
+              longitude_match <- -lng_dd
             }
           }
         }
       }
       
+      #Check for latitude and longitude sign
       if (!exists("note")){
         country_query1 <- fromJSON(query_api(paste0('http://', api_host, '/api/', api_ver, '/gadm?lat=', -lat_dd, '&lng=', -lng_dd), apikey))
         if (!is.null(country_query1$intersection)){

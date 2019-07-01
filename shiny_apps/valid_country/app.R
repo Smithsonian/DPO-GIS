@@ -8,7 +8,7 @@ library(parallel)
 
 
 #Settings----
-app_name <- "Valid Country Coordinates Check Service"
+app_name <- "Country Coordinates Check Service"
 app_ver <- "0.1.0"
 github_link <- "https://github.com/Smithsonian/DPO-GIS"
 
@@ -40,13 +40,13 @@ ui <- fluidPage(
      ),
      column(width = 4, 
             uiOutput("ccv_mapgiven"),
-            leafletOutput("ccv_leafletgiven"),
+            leafletOutput("ccv_leafletgiven", height = "300px"),
             br(),
             uiOutput("ccv_mapfixed"),
-            leafletOutput("ccv_leafletfixed")
+            leafletOutput("ccv_leafletfixed", height = "300px")
      )
   ),
-  hr(),
+  #hr(),
   #footer ----
   HTML(paste0("<br><br><br><div class=\"footer navbar-fixed-bottom\"><br><p>&nbsp;&nbsp;<a href=\"http://dpo.si.edu\" target = _blank><img src=\"dpologo.jpg\"></a> | ", app_name, ", ver. ", app_ver, " | <a href=\"", github_link, "\" target = _blank>Source code</a></p></div>"))
   
@@ -67,13 +67,13 @@ server <- function(input, output, session) {
   output$main <- renderUI({
     if (is.null(input$ccv_csvinput)){
       shinyWidgets::panel(
-        p("To use this app, upload a csv or Excel (xlsx) file to find the spatial matches. The file must have these columns:"),
+        HTML("<p>To use this app, upload a <b>csv</b> or <b>Excel (xlsx)</b> file to check that the country matches the coordinates. The file must have these columns:</p>"),
         HTML("<ul>
               <li>id</li>
               <li>decimallatitude</li>
               <li>decimallongitude</li>
               <li>country</li>
-             </ul>"),
+             </ul><p>The coordinates must be in decimal format and using the WGS84 datum."),
         heading = "Welcome",
         status = "primary"
       )
@@ -89,9 +89,9 @@ server <- function(input, output, session) {
         selectInput("countrycode", "Countries are coded using:",
                     list(`ISO-2 character` = "iso2c",
                          `ISO-3 character` = "iso3c",
-                         `Full name` = "country.name")
+                         `Full name` = "country.name"), 
         ),
-        fileInput("ccv_csvinput", "Upload an Input File",
+        fileInput("ccv_csvinput", "Upload the input file",
                   multiple = FALSE,
                   accept = c("text/csv",
                              "text/comma-separated-values,text/plain",
@@ -203,7 +203,8 @@ server <- function(input, output, session) {
                                  language = list(zeroRecords = "Coordinates match the country in all rows")),
                   rownames = FALSE,
                   selection = 'single',
-                  caption = paste0('Found ', no_errors, ' rows with problems (of ', no_rows, ', ', round((no_errors/no_rows) * 100, 2), '%)'), )
+                  caption = paste0('Found ', no_errors, ' rows with problems (of ', no_rows, ', ', round((no_errors/no_rows) * 100, 2), '%)')) %>%
+      formatStyle(c('id', 'country', 'latitude', 'longitude'),  color = 'grey')
   })
   
   
@@ -222,6 +223,7 @@ server <- function(input, output, session) {
       
       tagList(
         h3("Map with input coordinates"),
+        p(paste0('Lon: ', lng_dd, ' / Lat: ', lat_dd)),
         br()
       )
     }
@@ -267,6 +269,7 @@ server <- function(input, output, session) {
       
       tagList(
         h3("Map with corrected coordinates"),
+        p(paste0('Lon: ', lng_dd1, ' / Lat: ', lat_dd1)),
         br()
       )
     }
