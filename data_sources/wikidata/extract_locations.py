@@ -7,7 +7,7 @@
 Based on script at https://akbaritabar.netlify.com/how_to_use_a_wikidata_dump
 """
 
-import json, pydash, os, sys, psycopg2
+import json, pydash, os, sys, psycopg2, bz2
 from pathlib import Path
 #To measure how long it takes
 import time
@@ -32,21 +32,21 @@ def wikidata(filename):
     if ext == '.json':
         #Uncompressed JSON
         with open(filename, mode='rt') as f:
-        f.read(2) # skip first two bytes: "{\n"
-        for line in f:
-            try:
-                yield json.loads(line.rstrip(',\n'))
-            except json.decoder.JSONDecodeError:
-                continue
+            f.read(2) # skip first two bytes: "{\n"
+            for line in f:
+                try:
+                    yield json.loads(line.rstrip(',\n'))
+                except json.decoder.JSONDecodeError:
+                    continue
     elif ext == '.bz2':
         #Compressed bz2
         with bz2.open(filename, mode='rt') as f:
-        f.read(2) # skip first two bytes: "{\n"
-        for line in f:
-            try:
-                yield json.loads(line.rstrip(',\n'))
-            except json.decoder.JSONDecodeError:
-                continue
+            f.read(2) # skip first two bytes: "{\n"
+            for line in f:
+                try:
+                    yield json.loads(line.rstrip(',\n'))
+                except json.decoder.JSONDecodeError:
+                    continue
     else:
         print("ERROR: Unknown format.")
         return False
