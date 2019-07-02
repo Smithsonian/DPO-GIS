@@ -2,9 +2,10 @@ library(shiny)
 library(leaflet)
 library(jsonlite)
 library(futile.logger)
-library(collexScrubber)
+library(dplyr)
 library(countrycode)
 library(parallel)
+library(DT)
 
 
 #Settings----
@@ -189,7 +190,7 @@ server <- function(input, output, session) {
     
     names(results_table) <- c('id', 'country', 'latitude', 'longitude', 'matched_country', 'matched_latitude', 'matched_longitude', 'notes')
     
-    results <<- filter(results_table, notes != 'Coordinates match')
+    results <<- dplyr::filter(results_table, notes != 'Coordinates match')
     #results <<- results_table
     
     no_errors <- dim(results)[1]
@@ -269,7 +270,7 @@ server <- function(input, output, session) {
       
       tagList(
         h3("Map with corrected coordinates"),
-        p(paste0('Lon: ', lng_dd1, ' / Lat: ', lat_dd1)),
+        p(paste0('Lon: ', lng_dd, ' / Lat: ', lat_dd)),
         br()
       )
     }
