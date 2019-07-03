@@ -18,6 +18,8 @@ options(encoding = 'UTF-8')
 #Logfile
 logfile <- paste0("logs/", format(Sys.time(), "%Y%m%d_%H%M%S"), ".txt")
 
+#Larger size for input file
+options(shiny.maxRequestSize=100*1024^2)
 
 
 #Settings
@@ -74,7 +76,7 @@ server <- function(input, output, session) {
               <li>decimallatitude</li>
               <li>decimallongitude</li>
               <li>country</li>
-             </ul><p>The coordinates must be in decimal format and using the WGS84 datum."),
+             </ul><p>The coordinates must be in decimal format and using the WGS84 datum. Filesize is limited to 100MB."),
         heading = "Welcome",
         status = "primary"
       )
