@@ -9,7 +9,7 @@ library(DT)
 
 
 #Settings----
-app_name <- "Country Coordinates Check Service"
+app_name <- "Country-Coordinates Check Service"
 app_ver <- "0.1.1"
 github_link <- "https://github.com/Smithsonian/DPO-GIS"
 
@@ -43,10 +43,8 @@ ui <- fluidPage(
      ),
      column(width = 4, 
             uiOutput("ccv_mapgiven"),
-            leafletOutput("ccv_leafletgiven", height = "300px"),
             br(),
-            uiOutput("ccv_mapfixed"),
-            leafletOutput("ccv_leafletfixed", height = "300px")
+            uiOutput("ccv_mapfixed")
      )
   ),
   #hr(),
@@ -185,12 +183,12 @@ server <- function(input, output, session) {
       
       progress0$set(value = progress_val, message = "Saving results")
       
-      results_table <- rbind(results_table, cbind(results_p[[i]]$id, results_p[[i]]$country, results_p[[i]]$latitude, results_p[[i]]$longitude, results_p[[i]]$country_match, results_p[[i]]$latitude_match, results_p[[i]]$longitude_match, results_p[[i]]$note))
+      results_table <- rbind(results_table, cbind(results_p[[i]]$id, results_p[[i]]$country, results_p[[i]]$longitude, results_p[[i]]$latitude, results_p[[i]]$country_match, results_p[[i]]$longitude_match, results_p[[i]]$latitude_match, results_p[[i]]$note))
     }
     
     progress0$set(message = "Done!", value = 1)
     
-    names(results_table) <- c('id', 'country', 'latitude', 'longitude', 'matched_country', 'matched_latitude', 'matched_longitude', 'notes')
+    names(results_table) <- c('id', 'country', 'longitude', 'latitude', 'matched_country', 'matched_longitude', 'matched_latitude', 'notes')
     
     results <<- dplyr::filter(results_table, notes != 'Coordinates match')
     #results <<- results_table
@@ -206,7 +204,7 @@ server <- function(input, output, session) {
                                  language = list(zeroRecords = "Coordinates match the country in all rows")),
                   rownames = FALSE,
                   selection = 'single',
-                  caption = paste0('Found ', no_errors, ' rows with problems (of ', no_rows, ', ', round((no_errors/no_rows) * 100, 2), '%)')) %>%
+                  caption = paste0('Found ', no_errors, ' rows with problems (of ', no_rows, ', ', round((no_errors/no_rows) * 100, 2), '%). Click on a record to see the details.')) %>%
       formatStyle(c('id', 'country', 'latitude', 'longitude'),  color = 'grey')
   })
   
@@ -224,10 +222,9 @@ server <- function(input, output, session) {
     
     if (!is.na(lng_dd) && !is.na(lat_dd)){
       
-      tagList(
-        h3("Map with input coordinates"),
-        p(paste0('Lon: ', lng_dd, ' / Lat: ', lat_dd)),
-        br()
+      shinyWidgets::panel(heading = "Map with input coordinates", status = "warning",
+        HTML(paste0('<dl class="dl-horizontal"><dt>Longitude</dt><dd>', lng_dd, '</dd><dt>Latitude</dt><dd>', lat_dd, '</dd></dl>')),
+        leafletOutput("ccv_leafletgiven", height = "300px")
       )
     }
   })
@@ -270,10 +267,9 @@ server <- function(input, output, session) {
     
     if (!is.na(lng_dd) && !is.na(lat_dd) && (lng_dd != lng_dd1 || lat_dd != lat_dd1)){
       
-      tagList(
-        h3("Map with corrected coordinates"),
-        p(paste0('Lon: ', lng_dd, ' / Lat: ', lat_dd)),
-        br()
+      shinyWidgets::panel(heading = "Map with corrected coordinates", status = "success", 
+        HTML(paste0('<dl class="dl-horizontal"><dt>Longitude</dt><dd>', lng_dd, '</dd><dt>Latitude</dt><dd>', lat_dd, '</dd></dl>')),
+        leafletOutput("ccv_leafletfixed", height = "300px")
       )
     }
   })
