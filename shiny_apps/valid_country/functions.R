@@ -27,7 +27,22 @@ countrycheck <- function(id, latitude, longitude, country, countryformat = "iso2
     country_match <- NA
     latitude_match <- NA
     longitude_match <- NA
-    note <- "Error: Latitude and Longitude are zero. This is, most probably, an error."
+    note <- "Error: Both latitude and longitude are zero. This is, most probably, an error."
+  }else if ((latitude == 90 || latitude == -90) && (longitude == 180 || longitude == -180)){
+    country_match <- NA
+    latitude_match <- NA
+    longitude_match <- NA
+    note <- "Error: Latitude and longitude are on the edge of the WGS84 datum. This is, most probably, an error."
+  }else if (latitude > 90 || latitude < -90){
+    country_match <- NA
+    latitude_match <- NA
+    longitude_match <- NA
+    note <- "Error: Latitude is outside the valid range of the WGS84 datum."
+  }else if (longitude > 180 || longitude < -180){
+    country_match <- NA
+    latitude_match <- NA
+    longitude_match <- NA
+    note <- "Error: Longitude is outside the valid range of the WGS84 datum."
   }else{
     lng_dd <- longitude
     lat_dd <- latitude

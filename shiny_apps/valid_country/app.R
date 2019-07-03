@@ -10,7 +10,7 @@ library(DT)
 
 #Settings----
 app_name <- "Country Coordinates Check Service"
-app_ver <- "0.1.0"
+app_ver <- "0.1.1"
 github_link <- "https://github.com/Smithsonian/DPO-GIS"
 
 options(stringsAsFactors = FALSE)
