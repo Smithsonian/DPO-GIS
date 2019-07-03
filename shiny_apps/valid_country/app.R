@@ -6,6 +6,8 @@ library(dplyr)
 library(countrycode)
 library(parallel)
 library(DT)
+library(WriteXLS)
+library(openxlsx)
 
 
 #Settings----
@@ -38,10 +40,12 @@ ui <- fluidPage(
            uiOutput("ccv_uploadcsv")
     )),
     fluidRow(
-     column(width = 8,
-            DT::dataTableOutput("ccv_table")
+     column(width = 7,
+           DT::dataTableOutput("ccv_table"),
+           br(),
+           uiOutput("downloadData")
      ),
-     column(width = 4, 
+     column(width = 5, 
             uiOutput("ccv_mapgiven"),
             br(),
             uiOutput("ccv_mapfixed")
@@ -149,7 +153,7 @@ server <- function(input, output, session) {
     
     progress_steps <- round(((0.9) / steps), 4)
     progress_val <- 0.1
-    progress0$set(value = progress_val, message = "Querying API...")
+    progress0$set(value = progress_val, message = "Checking rows...")
     
     results_p <- list()
     
@@ -166,11 +170,11 @@ server <- function(input, output, session) {
       }
       
       cat(paste(from_row, to_row, '\n'))
-      cat(paste0("Querying API (", round(((s/steps) * 100), 1), "% completed)\n"))
+      cat(paste0("Checking rows (", round(((s/steps) * 100), 1), "% completed)\n"))
       
       res <- parLapply(cl, seq(from_row, to_row), countrycheck_data)
       progress_val <- (s * progress_steps) + 0.1
-      progress0$set(value = progress_val, message = paste0("Querying API (", round(((s/steps) * 100), 1), "% completed)"))
+      progress0$set(value = progress_val, message = paste0("Checking rows (", round(((s/steps) * 100), 1), "% completed)"))
       results_p <- c(results_p, res)
     }
     
@@ -193,9 +197,11 @@ server <- function(input, output, session) {
     results <<- dplyr::filter(results_table, notes != 'Coordinates match')
     #results <<- results_table
     
-    no_errors <- dim(results)[1]
+    results_table <- dplyr::select(results, -notes)
     
-    DT::datatable(results,
+    no_errors <- dim(results_table)[1]
+    
+    DT::datatable(results_table,
                   escape = FALSE,
                   options = list(searching = TRUE,
                                  ordering = TRUE,
@@ -219,11 +225,12 @@ server <- function(input, output, session) {
     
     lng_dd <- this_row$longitude
     lat_dd <- this_row$latitude
+    notes <- this_row$notes
     
     if (!is.na(lng_dd) && !is.na(lat_dd)){
       
       shinyWidgets::panel(heading = "Map with input coordinates", status = "warning",
-        HTML(paste0('<dl class="dl-horizontal"><dt>Longitude</dt><dd>', lng_dd, '</dd><dt>Latitude</dt><dd>', lat_dd, '</dd></dl>')),
+        HTML(paste0('<dl class="dl-horizontal"><dt>Longitude</dt><dd>', lng_dd, '</dd><dt>Latitude</dt><dd>', lat_dd, '</dd><dt>Notes</dt><dd class="text-danger">', notes, '</dd></dl>')),
         leafletOutput("ccv_leafletgiven", height = "300px")
       )
     }
@@ -294,6 +301,54 @@ server <- function(input, output, session) {
         setView(lng = as.numeric(lng_dd), lat = as.numeric(lat_dd), zoom = 04) %>%
         addScaleBar()
     }
+  })
+  
+  
+  
+  #download CSV----
+  #Download CSV
+  output$downloadcsv1 <- downloadHandler(
+    #Downloadable csv of results
+    filename = function() {
+      paste("results_countrycheck_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv", sep = "")
+    },
+    content = function(file) {
+      write.csv(results, file, quote = TRUE, na = "", row.names = FALSE)
+    }
+  )
+  
+  
+  #download XLSX----
+  #Download XLSX
+  output$downloadcsv2 <- downloadHandler(
+    filename = function(){paste0("results_countrycheck_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".xlsx")},
+    
+    content = function(file){
+      WriteXLS::WriteXLS(x = results, ExcelFileName = file, AdjWidth = TRUE, BoldHeaderRow = TRUE, Encoding = "UTF-8", row.names = FALSE, FreezeRow = 1, SheetNames = c("results_aat"))
+    },
+    contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  )
+  
+  
+  #downloadData ----
+  output$downloadData <- renderUI({
+    req(input$ccv_csvinput)
+    
+    shinyWidgets::panel(
+      HTML("<p>Download the results as a Comma Separated Values file (.csv) or an Excel file (.xlsx).</p><p>The results file contains the same columns as the input file, untouched, with four additional columns:</p>"),
+      HTML('<dl class="dl-horizontal">
+                <dt>matched_country</dt><dd>The country the corrected coordinated matched</dd>
+                <dt>matched_longitude</dt><dd> The corrected longitude</dd>
+                <dt>matched_latitude</dt><dd>The corrected latitude</dd>
+                <dt>notes</dt><dd>The specific issue with the coordinates</dd></dl>'),
+      br(),
+      HTML("<div class=\"btn-toolbar\">"),
+      downloadButton("downloadcsv1", "CSV (.csv)", class = "btn-success"),
+      downloadButton("downloadcsv2", "Excel (.xlsx)", class = "btn-primary"),
+      HTML("</div>"),
+      heading = "Download Results",
+      status = "primary"
+    )
   })
 }
 
