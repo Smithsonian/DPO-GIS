@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-
+#
 """Get Wikidata dump records as a JSON stream (one JSON object per line) and save the data to a Postgres database."""
-# Modified script taken from this link: "https://www.reddit.com/r/LanguageTechnology/comments/7wc2oi/does_anyone_know_a_good_python_library_code/dtzsh2j/"
-
-"""
-Based on script at https://akbaritabar.netlify.com/how_to_use_a_wikidata_dump
-"""
+#
+# Modified script taken from this link:
+#   "https://www.reddit.com/r/LanguageTechnology/comments/7wc2oi/does_anyone_know_a_good_python_library_code/dtzsh2j/"
+#   and based on script at https://akbaritabar.netlify.com/how_to_use_a_wikidata_dump
+# 
 
 import json, pydash, os, sys, psycopg2, bz2
 from pathlib import Path
@@ -18,7 +18,6 @@ start_time = time.time()
 
 #Get postgres creds
 import settings
-
 
 
 def wikidata(filename):
@@ -53,7 +52,6 @@ def wikidata(filename):
     
     
 
-
 if __name__ == '__main__':
     i = 0
     import argparse
@@ -75,6 +73,13 @@ if __name__ == '__main__':
     conn = psycopg2.connect(host = settings.host, database = settings.db, user = settings.user)
     conn.autocommit = True
     cur = conn.cursor()
+    cur.execute("UPDATE data_sources SET is_online = 'F' WHERE source_id = 'wikidata'")
+    cur.execute("DELETE FROM wikidata_names")
+    cur.execute("VACUUM wikidata_names")
+    cur.execute("DELETE FROM wikidata_descrip")
+    cur.execute("VACUUM wikidata_descrip")
+    cur.execute("DELETE FROM wikidata_records")
+    cur.execute("VACUUM wikidata_records")
     for record in wikidata(args.dumpfile):
         # only extract items with geographical coordinates (P625)
         if pydash.has(record, 'claims.P625'):
@@ -115,14 +120,18 @@ if __name__ == '__main__':
                     """,
                     {'id': item_id, 'type': item_type, 'name': english_label, 'latitude': latitude, 'longitude': longitude})
                 i += 1
+    cur.execute("UPDATE data_sources SET is_online = 'T' WHERE source_id = 'wikidata'")
     cur.close()
     conn.close()
+
 
 
 end_time = time.time()
 total_time = end_time - start_time
 
+
+
 #Display how many hours it took to run
-print("\nScript took {} hrs to complete.\n".format(total_time / 3600))
+print("\nScript took {} hrs to complete.\n".format(round(total_time / 3600, 2)))
 
 sys.exit(0)
