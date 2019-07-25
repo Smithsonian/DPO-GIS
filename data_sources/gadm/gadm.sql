@@ -177,3 +177,32 @@ UPDATE gadm5 SET the_geom_xmin = st_xmin(the_geom);
 UPDATE gadm5 SET the_geom_xmax = st_xmax(the_geom);
 UPDATE gadm5 SET the_geom_ymin = st_ymin(the_geom);
 UPDATE gadm5 SET the_geom_ymax = st_ymax(the_geom);
+
+
+
+--Add geom_webmercator
+ALTER TABLE gadm0 ADD COLUMN the_geom_webmercator geometry;
+--Issues with Antarctica
+UPDATE gadm0 SET the_geom_webmercator = st_transform(the_geom, 3857) where name_0 != 'Antarctica';
+CREATE INDEX gadm0_tgeomw_idx ON gadm0 USING GIST(the_geom_webmercator);
+
+ALTER TABLE gadm1 ADD COLUMN the_geom_webmercator geometry;
+UPDATE gadm1 SET the_geom_webmercator = st_transform(the_geom, 3857);
+CREATE INDEX gadm1_tgeomw_idx ON gadm1 USING GIST(the_geom_webmercator);
+
+ALTER TABLE gadm2 ADD COLUMN the_geom_webmercator geometry;
+UPDATE gadm2 SET the_geom_webmercator = st_transform(the_geom, 3857);
+CREATE INDEX gadm2_tgeomw_idx ON gadm2 USING GIST(the_geom_webmercator);
+
+ALTER TABLE gadm3 ADD COLUMN the_geom_webmercator geometry;
+UPDATE gadm3 SET the_geom_webmercator = st_transform(the_geom, 3857);
+CREATE INDEX gadm3_tgeomw_idx ON gadm3 USING GIST(the_geom_webmercator);
+
+ALTER TABLE gadm4 ADD COLUMN the_geom_webmercator geometry;
+UPDATE gadm4 SET the_geom_webmercator = st_transform(the_geom, 3857);
+CREATE INDEX gadm4_tgeomw_idx ON gadm4 USING GIST(the_geom_webmercator);
+
+ALTER TABLE gadm5 ADD COLUMN the_geom_webmercator geometry;
+UPDATE gadm5 SET the_geom_webmercator = st_transform(the_geom, 3857);
+CREATE INDEX gadm5_tgeomw_idx ON gadm5 USING GIST(the_geom_webmercator);
+
