@@ -1,7 +1,15 @@
 #!/bin/bash
 #
-#Get the OSM extracts from geofabrik and refreshes the PostGIS database
+#Get the OSM extracts from geofabrik.de and refresh the PostGIS database
+# using osm2pgsql (https://wiki.openstreetmap.org/wiki/Osm2pgsql)
 #
+
+#Today's date
+date +'%m/%d/%Y'
+script_date=$(date +'%Y-%m-%d')
+
+#Turn datasource offline
+psql -U gisuser -h localhost gis -c "UPDATE data_sources SET is_online = 'f' WHERE source_id = 'osm';"
 
 #Delete tables in database
 psql -U gisuser -h localhost gis -c "DROP TABLE planet_osm_line CASCADE;"
@@ -23,14 +31,18 @@ for i in ${!osm_files[@]}; do
     echo "Working on file ${osm_files[$i]}..."
     echo ""
     #Download using wget
-    wget https://download.geofabrik.de/${osm_files[$i]}
+    wget https://download.geofabrik.de/${osm_files[$i]} > $date.log
     if [ "$i" -eq "0" ]; then
         #If it is the first one, dont append
-        osm2pgsql --latlong --slim --username gisuser --host localhost --database gis --multi-geometry --verbose ${osm_files[$i]}
+        osm2pgsql --latlong --slim --username gisuser --host localhost --database gis --multi-geometry --verbose ${osm_files[$i]} > $date.log
     else
         #Append to existing tables
-        osm2pgsql --append --latlong --slim --username gisuser --host localhost --database gis --multi-geometry --verbose ${osm_files[$i]}
+        osm2pgsql --append --latlong --slim --username gisuser --host localhost --database gis --multi-geometry --verbose ${osm_files[$i]} > $date.log
     fi
 
 done
 
+#Set back online and update date
+psql -U gisuser -h localhost gis -c "UPDATE data_sources SET is_online = 't', source_date = '$script_date' WHERE source_id = 'osm';"
+
+rm *.osm.pbf
