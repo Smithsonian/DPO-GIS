@@ -45,3 +45,9 @@ settings.py
 *.csv
 
 logs
+
+*.bz2
+*.gz
+*.pbf
+__pycache__
+

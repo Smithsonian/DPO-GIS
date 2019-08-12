@@ -1,28 +1,39 @@
 
+
+
+--Make sure all the geoms are multipolygons and that they are valid
+UPDATE gadm0 SET the_geom = ST_MULTI(ST_SETSRID(the_geom, 4326));
+UPDATE gadm0 SET the_geom = ST_MAKEVALID(the_geom) WHERE ST_ISVALID(the_geom) = 'F';
+UPDATE gadm1 SET the_geom = ST_MULTI(ST_SETSRID(the_geom, 4326));
+UPDATE gadm1 SET the_geom = ST_MAKEVALID(the_geom) WHERE ST_ISVALID(the_geom) = 'F';
+UPDATE gadm2 SET the_geom = ST_MULTI(ST_SETSRID(the_geom, 4326));
+UPDATE gadm2 SET the_geom = ST_MAKEVALID(the_geom) WHERE ST_ISVALID(the_geom) = 'F';
+UPDATE gadm3 SET the_geom = ST_MULTI(ST_SETSRID(the_geom, 4326));
+UPDATE gadm3 SET the_geom = ST_MAKEVALID(the_geom) WHERE ST_ISVALID(the_geom) = 'F';
+UPDATE gadm4 SET the_geom = ST_MULTI(ST_SETSRID(the_geom, 4326));
+UPDATE gadm4 SET the_geom = ST_MAKEVALID(the_geom) WHERE ST_ISVALID(the_geom) = 'F';
+UPDATE gadm5 SET the_geom = ST_MULTI(ST_SETSRID(the_geom, 4326));
+UPDATE gadm5 SET the_geom = ST_MAKEVALID(the_geom) WHERE ST_ISVALID(the_geom) = 'F';
+
 --Set SRID of geom column
-UPDATE gadm0 SET the_geom = ST_SETSRID(the_geom, 4326);
 CREATE INDEX gadm0_name0_idx ON gadm0 USING btree (name_0);
 CREATE INDEX gadm0_the_geom_idx ON gadm0 USING gist (the_geom);
 
-UPDATE gadm1 SET the_geom = ST_SETSRID(the_geom, 4326);
 CREATE INDEX gadm1_name1_idx ON gadm1 USING btree (name_1);
 CREATE INDEX gadm1_name0_idx ON gadm1 USING btree (name_0);
 CREATE INDEX gadm1_the_geom_idx ON gadm1 USING gist (the_geom);
 
-UPDATE gadm2 SET the_geom = ST_SETSRID(the_geom, 4326);
 CREATE INDEX gadm2_name0_idx ON gadm2 USING btree (name_0);
 CREATE INDEX gadm2_name1_idx ON gadm2 USING btree (name_1);
 CREATE INDEX gadm2_name2_idx ON gadm2 USING btree (name_2);
 CREATE INDEX gadm2_the_geom_idx ON gadm2 USING gist (the_geom);
 
-UPDATE gadm3 SET the_geom = ST_SETSRID(the_geom, 4326);
 CREATE INDEX gadm3_name3_idx ON gadm3 USING btree (name_3);
 CREATE INDEX gadm3_name2_idx ON gadm3 USING btree (name_2);
 CREATE INDEX gadm3_name1_idx ON gadm3 USING btree (name_1);
 CREATE INDEX gadm3_name0_idx ON gadm3 USING btree (name_0);
 CREATE INDEX gadm3_the_geom_idx ON gadm3 USING gist (the_geom);
 
-UPDATE gadm4 SET the_geom = ST_SETSRID(the_geom, 4326);
 CREATE INDEX gadm4_name4_idx ON gadm4 USING btree (name_4);
 CREATE INDEX gadm4_name3_idx ON gadm4 USING btree (name_3);
 CREATE INDEX gadm4_name2_idx ON gadm4 USING btree (name_2);
@@ -30,7 +41,6 @@ CREATE INDEX gadm4_name1_idx ON gadm4 USING btree (name_1);
 CREATE INDEX gadm4_name0_idx ON gadm4 USING btree (name_0);
 CREATE INDEX gadm4_the_geom_idx ON gadm4 USING gist (the_geom);
 
-UPDATE gadm5 SET the_geom = ST_SETSRID(the_geom, 4326);
 CREATE INDEX gadm5_name5_idx ON gadm5 USING btree (name_5);
 CREATE INDEX gadm5_name4_idx ON gadm5 USING btree (name_4);
 CREATE INDEX gadm5_name3_idx ON gadm5 USING btree (name_3);
@@ -53,21 +63,6 @@ CREATE INDEX gadm2_uid_idx ON gadm2 USING btree (uid);
 CREATE INDEX gadm3_uid_idx ON gadm3 USING btree (uid);
 CREATE INDEX gadm4_uid_idx ON gadm4 USING btree (uid);
 CREATE INDEX gadm5_uid_idx ON gadm5 USING btree (uid);
-
-
---Make sure all the geoms are multipolygons and that they are valid
-UPDATE gadm0 SET the_geom = ST_MULTI(ST_SETSRID(the_geom, 4326));
-UPDATE gadm0 SET the_geom = ST_MAKEVALID(the_geom) WHERE ST_ISVALID(the_geom) = 'F';
-UPDATE gadm1 SET the_geom = ST_MULTI(ST_SETSRID(the_geom, 4326));
-UPDATE gadm1 SET the_geom = ST_MAKEVALID(the_geom) WHERE ST_ISVALID(the_geom) = 'F';
-UPDATE gadm2 SET the_geom = ST_MULTI(ST_SETSRID(the_geom, 4326));
-UPDATE gadm2 SET the_geom = ST_MAKEVALID(the_geom) WHERE ST_ISVALID(the_geom) = 'F';
-UPDATE gadm3 SET the_geom = ST_MULTI(ST_SETSRID(the_geom, 4326));
-UPDATE gadm3 SET the_geom = ST_MAKEVALID(the_geom) WHERE ST_ISVALID(the_geom) = 'F';
-UPDATE gadm4 SET the_geom = ST_MULTI(ST_SETSRID(the_geom, 4326));
-UPDATE gadm4 SET the_geom = ST_MAKEVALID(the_geom) WHERE ST_ISVALID(the_geom) = 'F';
-UPDATE gadm5 SET the_geom = ST_MULTI(ST_SETSRID(the_geom, 4326));
-UPDATE gadm5 SET the_geom = ST_MAKEVALID(the_geom) WHERE ST_ISVALID(the_geom) = 'F';
 
 
 
@@ -123,67 +118,12 @@ CREATE INDEX gadm5_the_geom_simp_idx ON gadm5 USING GIST(the_geom_simp);
 
 
 
---Bounding coordinates
-ALTER TABLE gadm0 ADD COLUMN the_geom_xmin float;
-ALTER TABLE gadm0 ADD COLUMN the_geom_xmax float;
-ALTER TABLE gadm0 ADD COLUMN the_geom_ymin float;
-ALTER TABLE gadm0 ADD COLUMN the_geom_ymax float;
-UPDATE gadm0 SET the_geom_xmin = st_xmin(the_geom);
-UPDATE gadm0 SET the_geom_xmax = st_xmax(the_geom);
-UPDATE gadm0 SET the_geom_ymin = st_ymin(the_geom);
-UPDATE gadm0 SET the_geom_ymax = st_ymax(the_geom);
-
-ALTER TABLE gadm1 ADD COLUMN the_geom_xmin float;
-ALTER TABLE gadm1 ADD COLUMN the_geom_xmax float;
-ALTER TABLE gadm1 ADD COLUMN the_geom_ymin float;
-ALTER TABLE gadm1 ADD COLUMN the_geom_ymax float;
-UPDATE gadm1 SET the_geom_xmin = st_xmin(the_geom);
-UPDATE gadm1 SET the_geom_xmax = st_xmax(the_geom);
-UPDATE gadm1 SET the_geom_ymin = st_ymin(the_geom);
-UPDATE gadm1 SET the_geom_ymax = st_ymax(the_geom);
-
-ALTER TABLE gadm2 ADD COLUMN the_geom_xmin float;
-ALTER TABLE gadm2 ADD COLUMN the_geom_xmax float;
-ALTER TABLE gadm2 ADD COLUMN the_geom_ymin float;
-ALTER TABLE gadm2 ADD COLUMN the_geom_ymax float;
-UPDATE gadm2 SET the_geom_xmin = st_xmin(the_geom);
-UPDATE gadm2 SET the_geom_xmax = st_xmax(the_geom);
-UPDATE gadm2 SET the_geom_ymin = st_ymin(the_geom);
-UPDATE gadm2 SET the_geom_ymax = st_ymax(the_geom);
-
-ALTER TABLE gadm3 ADD COLUMN the_geom_xmin float;
-ALTER TABLE gadm3 ADD COLUMN the_geom_xmax float;
-ALTER TABLE gadm3 ADD COLUMN the_geom_ymin float;
-ALTER TABLE gadm3 ADD COLUMN the_geom_ymax float;
-UPDATE gadm3 SET the_geom_xmin = st_xmin(the_geom);
-UPDATE gadm3 SET the_geom_xmax = st_xmax(the_geom);
-UPDATE gadm3 SET the_geom_ymin = st_ymin(the_geom);
-UPDATE gadm3 SET the_geom_ymax = st_ymax(the_geom);
-
-ALTER TABLE gadm4 ADD COLUMN the_geom_xmin float;
-ALTER TABLE gadm4 ADD COLUMN the_geom_xmax float;
-ALTER TABLE gadm4 ADD COLUMN the_geom_ymin float;
-ALTER TABLE gadm4 ADD COLUMN the_geom_ymax float;
-UPDATE gadm4 SET the_geom_xmin = st_xmin(the_geom);
-UPDATE gadm4 SET the_geom_xmax = st_xmax(the_geom);
-UPDATE gadm4 SET the_geom_ymin = st_ymin(the_geom);
-UPDATE gadm4 SET the_geom_ymax = st_ymax(the_geom);
-
-ALTER TABLE gadm5 ADD COLUMN the_geom_xmin float;
-ALTER TABLE gadm5 ADD COLUMN the_geom_xmax float;
-ALTER TABLE gadm5 ADD COLUMN the_geom_ymin float;
-ALTER TABLE gadm5 ADD COLUMN the_geom_ymax float;
-UPDATE gadm5 SET the_geom_xmin = st_xmin(the_geom);
-UPDATE gadm5 SET the_geom_xmax = st_xmax(the_geom);
-UPDATE gadm5 SET the_geom_ymin = st_ymin(the_geom);
-UPDATE gadm5 SET the_geom_ymax = st_ymax(the_geom);
-
-
-
 --Add geom_webmercator
 ALTER TABLE gadm0 ADD COLUMN the_geom_webmercator geometry;
---Issues with Antarctica
-UPDATE gadm0 SET the_geom_webmercator = st_transform(the_geom, 3857) where name_0 != 'Antarctica';
+--Issues with Antarctica at the edge of (180 90), clip just inside
+UPDATE gadm0 SET the_geom = ST_INTERSECTION(the_geom, ST_SETSRID(ST_GeomFromText('POLYGON((-179.999999 -89.999999, 179.999999 -89.999999, 179.999999 89.999999, -179.999999 89.999999, -179.999999 -89.999999))'), 4326)) WHERE name_0 = 'Antarctica';
+
+UPDATE gadm0 SET the_geom_webmercator = st_transform(the_geom, 3857);
 CREATE INDEX gadm0_tgeomw_idx ON gadm0 USING GIST(the_geom_webmercator);
 
 ALTER TABLE gadm1 ADD COLUMN the_geom_webmercator geometry;

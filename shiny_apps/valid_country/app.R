@@ -53,7 +53,7 @@ ui <- fluidPage(
   ),
   #hr(),
   #footer ----
-  HTML(paste0("<br><br><br><div class=\"footer navbar-fixed-bottom\"><br><p>&nbsp;&nbsp;<a href=\"http://dpo.si.edu\" target = _blank><img src=\"dpologo.jpg\"></a> | ", app_name, ", ver. ", app_ver, " | <a href=\"", github_link, "\" target = _blank>Source code</a></p></div>"))
+  HTML(paste0("<br><br><br><div class=\"footer navbar-fixed-bottom\" style = \"background: white;\"><br><p>&nbsp;&nbsp;<a href=\"http://dpo.si.edu\" target = _blank><img src=\"dpologo.jpg\"></a> | ", app_name, ", ver. ", app_ver, " | <a href=\"", github_link, "\" target = _blank>Source code</a></p></div>"))
   
 )
 
@@ -128,15 +128,12 @@ server <- function(input, output, session) {
     no_rows <- dim(ccv_csvdata)[1]
     
     #Parallel
-    #Calculate the number of cores, if not in settings
-    if (!exists("no_cores")){
-      no_cores <- detectCores() - 1
-    }
+    
     # Initiate cluster
     cl <- makeCluster(no_cores)
     
     #Export data to cluster
-    clusterExport(cl=cl, varlist=c("ccv_csvdata", "countrycheck", "api_host", "api_ver", "query_api", "apikey"), envir=environment())
+    clusterExport(cl=cl, varlist=c("ccv_csvdata", "countrycheck", "api_host", "api_ver", "query_api", "api_search_gadm", "app_api_key", "api_search_nearest"), envir=environment())
     
     countrycheck_data <- function(i){
       library(jsonlite)
@@ -194,14 +191,13 @@ server <- function(input, output, session) {
     
     names(results_table) <- c('id', 'country', 'longitude', 'latitude', 'matched_country', 'matched_longitude', 'matched_latitude', 'notes')
     
-    results <<- dplyr::filter(results_table, notes != 'Coordinates match')
-    #results <<- results_table
+    results_table_2fix <<- dplyr::filter(results_table, notes != 'Coordinates match')
     
-    results_table <- dplyr::select(results, -notes)
+    results_table1 <- dplyr::select(results_table_2fix, -notes)
     
-    no_errors <- dim(results_table)[1]
+    no_errors <- dim(results_table1)[1]
     
-    DT::datatable(results_table,
+    DT::datatable(results_table1,
                   escape = FALSE,
                   options = list(searching = TRUE,
                                  ordering = TRUE,
@@ -221,7 +217,10 @@ server <- function(input, output, session) {
   output$ccv_mapgiven <- renderUI({
     req(input$ccv_table_rows_selected)
     
-    this_row <- results[input$ccv_table_rows_selected, ]
+    #Print selected row
+    print(input$ccv_table_rows_selected)
+    
+    this_row <- results_table_2fix[input$ccv_table_rows_selected, ]
     
     lng_dd <- this_row$longitude
     lat_dd <- this_row$latitude
@@ -241,7 +240,7 @@ server <- function(input, output, session) {
   output$ccv_leafletgiven <- renderLeaflet({
     req(input$ccv_table_rows_selected)
     
-    this_row <- results[input$ccv_table_rows_selected, ]
+    this_row <- results_table_2fix[input$ccv_table_rows_selected, ]
     
     lng_dd <- as.numeric(this_row$longitude)
     lat_dd <- as.numeric(this_row$latitude)
@@ -265,7 +264,7 @@ server <- function(input, output, session) {
   output$ccv_mapfixed <- renderUI({
     req(input$ccv_table_rows_selected)
     
-    this_row <- results[input$ccv_table_rows_selected, ]
+    this_row <- results_table_2fix[input$ccv_table_rows_selected, ]
     print(this_row)
     lng_dd <- this_row$matched_longitude
     lat_dd <- this_row$matched_latitude
@@ -285,7 +284,7 @@ server <- function(input, output, session) {
   output$ccv_leafletfixed <- renderLeaflet({
     req(input$ccv_table_rows_selected)
     
-    this_row <- results[input$ccv_table_rows_selected, ]
+    this_row <- results_table_2fix[input$ccv_table_rows_selected, ]
     
     lng_dd <- this_row$matched_longitude
     lat_dd <- this_row$matched_latitude
@@ -313,7 +312,7 @@ server <- function(input, output, session) {
       paste("results_countrycheck_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv", sep = "")
     },
     content = function(file) {
-      write.csv(results, file, quote = TRUE, na = "", row.names = FALSE)
+      write.csv(results_table, file, quote = TRUE, na = "", row.names = FALSE)
     }
   )
   
@@ -324,7 +323,7 @@ server <- function(input, output, session) {
     filename = function(){paste0("results_countrycheck_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".xlsx")},
     
     content = function(file){
-      WriteXLS::WriteXLS(x = results, ExcelFileName = file, AdjWidth = TRUE, BoldHeaderRow = TRUE, Encoding = "UTF-8", row.names = FALSE, FreezeRow = 1, SheetNames = c("results_aat"))
+      WriteXLS::WriteXLS(x = results_table, ExcelFileName = file, AdjWidth = TRUE, BoldHeaderRow = TRUE, Encoding = "UTF-8", row.names = FALSE, FreezeRow = 1, SheetNames = c("results_aat"))
     },
     contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
   )
@@ -333,6 +332,7 @@ server <- function(input, output, session) {
   #downloadData ----
   output$downloadData <- renderUI({
     req(input$ccv_csvinput)
+    #req(results)
     
     shinyWidgets::panel(
       HTML("<p>Download the results as a Comma Separated Values file (.csv) or an Excel file (.xlsx).</p><p>The results file contains the same columns as the input file, untouched, with four additional columns:</p>"),
@@ -346,6 +346,8 @@ server <- function(input, output, session) {
       downloadButton("downloadcsv1", "CSV (.csv)", class = "btn-success"),
       downloadButton("downloadcsv2", "Excel (.xlsx)", class = "btn-primary"),
       HTML("</div>"),
+      br(),
+      br(),
       heading = "Download Results",
       status = "primary"
     )

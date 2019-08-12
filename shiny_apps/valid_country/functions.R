@@ -47,12 +47,24 @@ countrycheck <- function(id, latitude, longitude, country, countryformat = "iso2
     lng_dd <- longitude
     lat_dd <- latitude
     if (countryformat != "iso3c"){
-      country_check <- countrycode(country, origin = countryformat, destination = "iso3c") 
+      country_check <- countrycode(country, origin = countryformat, destination = "iso3c")
     }
     
-    country_query <- fromJSON(query_api(paste0('http://', api_host, '/api/', api_ver, '/gadm?lat=', lat_dd, '&lng=', lng_dd), apikey))
-    if (!is.null(country_query$intersection$gadm0$name)){
-      country_match <- countrycode(country_query$intersection$gadm0$name, origin = "country.name", destination = "iso3c") 
+    api_req <- httr::GET(url = URLencode(paste0(api_search_gadm, 'lat=', lat_dd, '&lng=', lng_dd)),
+                         httr::add_headers(
+                           "X-Api-Key" = app_api_key
+                         )
+    )
+    
+    if (api_req$status_code != 200){
+      error_msg = fromJSON(httr::content(api_req, as = "text", encoding = "UTF-8"))
+      stop(error_msg['error'])
+    }else{
+      country_query <- as.data.frame(fromJSON(httr::content(api_req, as = "text", encoding = "UTF-8")), stringsAsFactors = FALSE)
+    }
+
+    if (!is.null(country_query$intersection.gadm0.name)){
+      country_match <- countrycode(country_query$intersection.gadm0.name, origin = "country.name", destination = "iso3c") 
     }else{
       country_match <- NA
     }
@@ -69,9 +81,21 @@ countrycheck <- function(id, latitude, longitude, country, countryformat = "iso2
     
     #Check for latitude sign
     if (!exists("note")){
-      country_query1 <- fromJSON(query_api(paste0('http://', api_host, '/api/', api_ver, '/gadm?lat=', -lat_dd, '&lng=', lng_dd), apikey))
-      if (!is.null(country_query1$intersection)){
-        country_match <- countrycode(country_query1$intersection$gadm0$name, origin = "country.name", destination = "iso3c") 
+      api_req <- httr::GET(url = URLencode(paste0(api_search_gadm, 'lat=', -lat_dd, '&lng=', lng_dd)),
+                           httr::add_headers(
+                             "X-Api-Key" = app_api_key
+                           )
+      )
+      
+      if (api_req$status_code != 200){
+        error_msg = fromJSON(httr::content(api_req, as = "text", encoding = "UTF-8"))
+        stop(error_msg['error'])
+      }else{
+        country_query <- as.data.frame(fromJSON(httr::content(api_req, as = "text", encoding = "UTF-8")), stringsAsFactors = FALSE)
+      }
+      
+      if (!is.null(country_query$intersection.gadm0.name)){
+        country_match <- countrycode(country_query$intersection.gadm0.name, origin = "country.name", destination = "iso3c") 
         if (!is.na(country_match)){
           if (country_check == country_match){
             note <- paste0('Latitude has the wrong sign, should be ', -lat_dd)
@@ -83,9 +107,21 @@ countrycheck <- function(id, latitude, longitude, country, countryformat = "iso2
       
       #Check for longitude sign
       if (!exists("note")){
-        country_query1 <- fromJSON(query_api(paste0('http://', api_host, '/api/', api_ver, '/gadm?lat=', lat_dd, '&lng=', -lng_dd), apikey))
-        if (!is.null(country_query1$intersection)){
-          country_match <- countrycode(country_query1$intersection$gadm0$name, origin = "country.name", destination = "iso3c") 
+        api_req <- httr::GET(url = URLencode(paste0(api_search_gadm, 'lat=', lat_dd, '&lng=', -lng_dd)),
+                             httr::add_headers(
+                               "X-Api-Key" = app_api_key
+                             )
+        )
+        
+        if (api_req$status_code != 200){
+          error_msg = fromJSON(httr::content(api_req, as = "text", encoding = "UTF-8"))
+          stop(error_msg['error'])
+        }else{
+          country_query <- as.data.frame(fromJSON(httr::content(api_req, as = "text", encoding = "UTF-8")), stringsAsFactors = FALSE)
+        }
+        
+        if (!is.null(country_query$intersection.gadm0.name)){
+          country_match <- countrycode(country_query$intersection.gadm0.name, origin = "country.name", destination = "iso3c") 
           if (!is.na(country_match)){
             if (country_check == country_match){
               note <- paste0('Longitude has the wrong sign, should be ', -lng_dd)
@@ -98,9 +134,21 @@ countrycheck <- function(id, latitude, longitude, country, countryformat = "iso2
       
       #Check for latitude and longitude sign
       if (!exists("note")){
-        country_query1 <- fromJSON(query_api(paste0('http://', api_host, '/api/', api_ver, '/gadm?lat=', -lat_dd, '&lng=', -lng_dd), apikey))
-        if (!is.null(country_query1$intersection)){
-          country_match <- countrycode(country_query1$intersection$gadm0$name, origin = "country.name", destination = "iso3c") 
+        api_req <- httr::GET(url = URLencode(paste0(api_search_gadm, 'lat=', -lat_dd, '&lng=', -lng_dd)),
+                             httr::add_headers(
+                               "X-Api-Key" = app_api_key
+                             )
+        )
+        
+        if (api_req$status_code != 200){
+          error_msg = fromJSON(httr::content(api_req, as = "text", encoding = "UTF-8"))
+          stop(error_msg['error'])
+        }else{
+          country_query <- as.data.frame(fromJSON(httr::content(api_req, as = "text", encoding = "UTF-8")), stringsAsFactors = FALSE)
+        }
+        
+        if (!is.null(country_query$intersection.gadm0.name)){
+          country_match <- countrycode(country_query$intersection.gadm0.name, origin = "country.name", destination = "iso3c") 
           if (!is.na(country_match)){
             if (country_check == country_match){
               note <- paste0('Latitude and longitude have the wrong sign, Latitude should be ', -lat_dd, ' and Longitude should be ', -lng_dd)
@@ -111,17 +159,31 @@ countrycheck <- function(id, latitude, longitude, country, countryformat = "iso2
         }
       }
       
+      
+      #Check nearest country
       if (!exists("note")){
-        country_query1 <- fromJSON(query_api(paste0('http://', api_host, '/api/', api_ver, '/country_nearest?rows=5&lat=', lat_dd, '&lng=', lng_dd), apikey))
-        if (!is.null(country_query1$results)){
+        api_req <- httr::GET(url = URLencode(paste0(api_search_nearest, 'rows=5&lat=', lat_dd, '&lng=', lng_dd)),
+                             httr::add_headers(
+                               "X-Api-Key" = app_api_key
+                             )
+        )
+        
+        if (api_req$status_code != 200){
+          error_msg = fromJSON(httr::content(api_req, as = "text", encoding = "UTF-8"))
+          stop(error_msg['error'])
+        }else{
+          country_query <- as.data.frame(fromJSON(httr::content(api_req, as = "text", encoding = "UTF-8")), stringsAsFactors = FALSE)
+        }
+        
+        if (!is.null(country_query$results.name)){
           
-          w <- which(countrycode(country_query1$results$name, origin = "country.name", destination = "iso3c") == country_check)
+          w <- which(countrycode(country_query$results.name, origin = "country.name", destination = "iso3c") == country_check)
           
-          country_match <- countrycode(country_query1$results$name[w], origin = "country.name", destination = "iso3c")
+          country_match <- countrycode(country_query$results.name[w], origin = "country.name", destination = "iso3c")
           
           if (length(country_match) > 0){
             if (country_check == country_match){
-              note <- paste0('Spatial error, distance from ', country, ': ', round(country_query1$results$distance_km[w], 2), 'km')
+              note <- paste0('Spatial error, distance from ', country, ': ', round(country_query$results.distance_km[w], 2), 'km')
               latitude_match <- lat_dd
               longitude_match <- lng_dd
             }
@@ -129,10 +191,24 @@ countrycheck <- function(id, latitude, longitude, country, countryformat = "iso2
         }
       }
       
+      
+      #Else, report which country the coords match
       if (!exists("note")){
-        country_query <- fromJSON(query_api(paste0('http://', api_host, '/api/', api_ver, '/gadm?lat=', lat_dd, '&lng=', lng_dd), apikey))
-        if (!is.null(country_query$intersection$gadm0$name)){
-          country_match <- countrycode(country_query$intersection$gadm0$name, origin = "country.name", destination = "iso3c") 
+        api_req <- httr::GET(url = URLencode(paste0(api_search_gadm, 'lat=', lat_dd, '&lng=', lng_dd)),
+                             httr::add_headers(
+                               "X-Api-Key" = app_api_key
+                             )
+        )
+        
+        if (api_req$status_code != 200){
+          error_msg = fromJSON(httr::content(api_req, as = "text", encoding = "UTF-8"))
+          stop(error_msg['error'])
+        }else{
+          country_query <- as.data.frame(fromJSON(httr::content(api_req, as = "text", encoding = "UTF-8")), stringsAsFactors = FALSE)
+        }
+        
+        if (!is.null(country_query$intersection.gadm0.name)){
+          country_match <- countrycode(country_query$intersection.gadm0.name, origin = "country.name", destination = "iso3c") 
           latitude_match <- lat_dd
           longitude_match <- lng_dd
           note <- paste0('Coordinates do not match ', country, ', they match ', country_match, ' (', countrycode(country_match, origin = "iso3c", destination = "country.name"), ')')
