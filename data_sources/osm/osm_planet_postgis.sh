@@ -8,7 +8,7 @@
 # Load the osm planet dump to postgres using osm2pgsql:
 #    osm2pgsql --latlong --slim --create -C 6000 --number-processes 6 --flat-nodes /mnt/fastdisk/data/osm_nodes/planet.nodes --username gisuser --host localhost --database gis --multi-geometry --verbose planet-latest.osm.pbf
 #
-# This takes a while.
+# This takes a while, probably a couple of days.
 # 
 # Delete the planet file, its about 50GB:
 #    rm planet-latest.osm.pbf
@@ -92,7 +92,6 @@ done
 
 #Recreate indices
 psql -U gisuser -h localhost gis -c "CREATE INDEX osm_name_idx ON osm USING BTREE(name);"
-psql -U gisuser -h localhost gis -c "CREATE INDEX osm_bbox_idx ON osm USING GIST(bbox);"
 psql -U gisuser -h localhost gis -c "CREATE INDEX osm_thegeom_idx ON osm USING GIST(the_geom);"
 psql -U gisuser -h localhost gis -c "CREATE INDEX osm_thegeomw_idx ON osm USING GIST(the_geom_webmercator);"
 psql -U gisuser -h localhost gis -c "CREATE INDEX osm_centroid_idx ON osm USING GIST(centroid);"
@@ -101,5 +100,5 @@ psql -U gisuser -h localhost gis -c "CREATE INDEX osm_centroid_idx ON osm USING 
 psql -U gisuser -h localhost gis -c "UPDATE data_sources SET is_online = 't', source_date = '$script_date' WHERE datasource_id = 'osm';"
 
 #Delete last tables
-psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS planet_osm_polygon CASCADE;"
-psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS planet_osm_ways CASCADE;"
+#psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS planet_osm_polygon CASCADE;"
+#psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS planet_osm_ways CASCADE;"

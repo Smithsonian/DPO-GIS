@@ -7,6 +7,7 @@ CREATE INDEX gbif_00_species_idx ON gbif_00 USING BTREE(species);
 CREATE INDEX gbif_00_genus_idx ON gbif_00 USING BTREE(genus);
 CREATE INDEX gbif_00_locality_trgm_idx ON gbif_00 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_00_thegeom_idx ON gbif_00 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_00 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_00_lon_idx ON gbif_00 USING btree(decimalLongitude);
 CREATE INDEX gbif_00_lat_idx ON gbif_00 USING btree(decimalLatitude);
 CLUSTER gbif_00 USING gbif_00_species_idx;
@@ -16,6 +17,7 @@ CREATE INDEX gbif_01_species_idx ON gbif_01 USING BTREE(species);
 CREATE INDEX gbif_01_genus_idx ON gbif_01 USING BTREE(genus);
 CREATE INDEX gbif_01_locality_trgm_idx ON gbif_01 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_01_thegeom_idx ON gbif_01 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_01 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_01_lon_idx ON gbif_01 USING btree(decimalLongitude);
 CREATE INDEX gbif_01_lat_idx ON gbif_01 USING btree(decimalLatitude);
 CLUSTER gbif_01 USING gbif_01_species_idx;
@@ -25,6 +27,7 @@ CREATE INDEX gbif_02_species_idx ON gbif_02 USING BTREE(species);
 CREATE INDEX gbif_02_genus_idx ON gbif_02 USING BTREE(genus);
 CREATE INDEX gbif_02_locality_trgm_idx ON gbif_02 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_02_thegeom_idx ON gbif_02 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_02 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_02_lon_idx ON gbif_02 USING btree(decimalLongitude);
 CREATE INDEX gbif_02_lat_idx ON gbif_02 USING btree(decimalLatitude);
 CLUSTER gbif_02 USING gbif_02_species_idx;
@@ -34,6 +37,7 @@ CREATE INDEX gbif_03_species_idx ON gbif_03 USING BTREE(species);
 CREATE INDEX gbif_03_genus_idx ON gbif_03 USING BTREE(genus);
 CREATE INDEX gbif_03_locality_trgm_idx ON gbif_03 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_03_thegeom_idx ON gbif_03 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_03 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_03_lon_idx ON gbif_03 USING btree(decimalLongitude);
 CREATE INDEX gbif_03_lat_idx ON gbif_03 USING btree(decimalLatitude);
 CLUSTER gbif_03 USING gbif_03_species_idx;
@@ -43,6 +47,7 @@ CREATE INDEX gbif_04_species_idx ON gbif_04 USING BTREE(species);
 CREATE INDEX gbif_04_genus_idx ON gbif_04 USING BTREE(genus);
 CREATE INDEX gbif_04_locality_trgm_idx ON gbif_04 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_04_thegeom_idx ON gbif_04 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_04 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_04_lon_idx ON gbif_04 USING btree(decimalLongitude);
 CREATE INDEX gbif_04_lat_idx ON gbif_04 USING btree(decimalLatitude);
 CLUSTER gbif_04 USING gbif_04_species_idx;
@@ -52,6 +57,7 @@ CREATE INDEX gbif_05_species_idx ON gbif_05 USING BTREE(species);
 CREATE INDEX gbif_05_genus_idx ON gbif_05 USING BTREE(genus);
 CREATE INDEX gbif_05_locality_trgm_idx ON gbif_05 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_05_thegeom_idx ON gbif_05 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_05 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_05_lon_idx ON gbif_05 USING btree(decimalLongitude);
 CREATE INDEX gbif_05_lat_idx ON gbif_05 USING btree(decimalLatitude);
 CLUSTER gbif_05 USING gbif_05_species_idx;
@@ -61,6 +67,7 @@ CREATE INDEX gbif_06_species_idx ON gbif_06 USING BTREE(species);
 CREATE INDEX gbif_06_genus_idx ON gbif_06 USING BTREE(genus);
 CREATE INDEX gbif_06_locality_trgm_idx ON gbif_06 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_06_thegeom_idx ON gbif_06 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_06 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_06_lon_idx ON gbif_06 USING btree(decimalLongitude);
 CREATE INDEX gbif_06_lat_idx ON gbif_06 USING btree(decimalLatitude);
 CLUSTER gbif_06 USING gbif_06_species_idx;
@@ -70,6 +77,7 @@ CREATE INDEX gbif_07_species_idx ON gbif_07 USING BTREE(species);
 CREATE INDEX gbif_07_genus_idx ON gbif_07 USING BTREE(genus);
 CREATE INDEX gbif_07_locality_trgm_idx ON gbif_07 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_07_thegeom_idx ON gbif_07 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_07 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_07_lon_idx ON gbif_07 USING btree(decimalLongitude);
 CREATE INDEX gbif_07_lat_idx ON gbif_07 USING btree(decimalLatitude);
 CLUSTER gbif_07 USING gbif_07_species_idx;
@@ -79,6 +87,7 @@ CREATE INDEX gbif_08_species_idx ON gbif_08 USING BTREE(species);
 CREATE INDEX gbif_08_genus_idx ON gbif_08 USING BTREE(genus);
 CREATE INDEX gbif_08_locality_trgm_idx ON gbif_08 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_08_thegeom_idx ON gbif_08 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_08 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_08_lon_idx ON gbif_08 USING btree(decimalLongitude);
 CREATE INDEX gbif_08_lat_idx ON gbif_08 USING btree(decimalLatitude);
 CLUSTER gbif_08 USING gbif_08_species_idx;
@@ -88,6 +97,7 @@ CREATE INDEX gbif_09_species_idx ON gbif_09 USING BTREE(species);
 CREATE INDEX gbif_09_genus_idx ON gbif_09 USING BTREE(genus);
 CREATE INDEX gbif_09_locality_trgm_idx ON gbif_09 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_09_thegeom_idx ON gbif_09 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_09 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_09_lon_idx ON gbif_09 USING btree(decimalLongitude);
 CREATE INDEX gbif_09_lat_idx ON gbif_09 USING btree(decimalLatitude);
 CLUSTER gbif_09 USING gbif_09_species_idx;
@@ -97,6 +107,7 @@ CREATE INDEX gbif_10_species_idx ON gbif_10 USING BTREE(species);
 CREATE INDEX gbif_10_genus_idx ON gbif_10 USING BTREE(genus);
 CREATE INDEX gbif_10_locality_trgm_idx ON gbif_10 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_10_thegeom_idx ON gbif_10 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_10 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_10_lon_idx ON gbif_10 USING btree(decimalLongitude);
 CREATE INDEX gbif_10_lat_idx ON gbif_10 USING btree(decimalLatitude);
 CLUSTER gbif_10 USING gbif_10_species_idx;
@@ -106,6 +117,7 @@ CREATE INDEX gbif_11_species_idx ON gbif_11 USING BTREE(species);
 CREATE INDEX gbif_11_genus_idx ON gbif_11 USING BTREE(genus);
 CREATE INDEX gbif_11_locality_trgm_idx ON gbif_11 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_11_thegeom_idx ON gbif_11 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_11 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_11_lon_idx ON gbif_11 USING btree(decimalLongitude);
 CREATE INDEX gbif_11_lat_idx ON gbif_11 USING btree(decimalLatitude);
 CLUSTER gbif_11 USING gbif_11_species_idx;
@@ -115,6 +127,7 @@ CREATE INDEX gbif_12_species_idx ON gbif_12 USING BTREE(species);
 CREATE INDEX gbif_12_genus_idx ON gbif_12 USING BTREE(genus);
 CREATE INDEX gbif_12_locality_trgm_idx ON gbif_12 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_12_thegeom_idx ON gbif_12 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_12 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_12_lon_idx ON gbif_12 USING btree(decimalLongitude);
 CREATE INDEX gbif_12_lat_idx ON gbif_12 USING btree(decimalLatitude);
 CLUSTER gbif_12 USING gbif_12_species_idx;
@@ -124,6 +137,7 @@ CREATE INDEX gbif_13_species_idx ON gbif_13 USING BTREE(species);
 CREATE INDEX gbif_13_genus_idx ON gbif_13 USING BTREE(genus);
 CREATE INDEX gbif_13_locality_trgm_idx ON gbif_13 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_13_thegeom_idx ON gbif_13 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_13 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_13_lon_idx ON gbif_13 USING btree(decimalLongitude);
 CREATE INDEX gbif_13_lat_idx ON gbif_13 USING btree(decimalLatitude);
 CLUSTER gbif_13 USING gbif_13_species_idx;
@@ -133,6 +147,7 @@ CREATE INDEX gbif_14_species_idx ON gbif_14 USING BTREE(species);
 CREATE INDEX gbif_14_genus_idx ON gbif_14 USING BTREE(genus);
 CREATE INDEX gbif_14_locality_trgm_idx ON gbif_14 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_14_thegeom_idx ON gbif_14 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_14 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_14_lon_idx ON gbif_14 USING btree(decimalLongitude);
 CREATE INDEX gbif_14_lat_idx ON gbif_14 USING btree(decimalLatitude);
 CLUSTER gbif_14 USING gbif_14_species_idx;
@@ -142,6 +157,7 @@ CREATE INDEX gbif_15_species_idx ON gbif_15 USING BTREE(species);
 CREATE INDEX gbif_15_genus_idx ON gbif_15 USING BTREE(genus);
 CREATE INDEX gbif_15_locality_trgm_idx ON gbif_15 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_15_thegeom_idx ON gbif_15 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_15 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_15_lon_idx ON gbif_15 USING btree(decimalLongitude);
 CREATE INDEX gbif_15_lat_idx ON gbif_15 USING btree(decimalLatitude);
 CLUSTER gbif_15 USING gbif_15_species_idx;
@@ -151,6 +167,7 @@ CREATE INDEX gbif_16_species_idx ON gbif_16 USING BTREE(species);
 CREATE INDEX gbif_16_genus_idx ON gbif_16 USING BTREE(genus);
 CREATE INDEX gbif_16_locality_trgm_idx ON gbif_16 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_16_thegeom_idx ON gbif_16 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_16 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_16_lon_idx ON gbif_16 USING btree(decimalLongitude);
 CREATE INDEX gbif_16_lat_idx ON gbif_16 USING btree(decimalLatitude);
 CLUSTER gbif_16 USING gbif_16_species_idx;
@@ -160,6 +177,7 @@ CREATE INDEX gbif_17_species_idx ON gbif_17 USING BTREE(species);
 CREATE INDEX gbif_17_genus_idx ON gbif_17 USING BTREE(genus);
 CREATE INDEX gbif_17_locality_trgm_idx ON gbif_17 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_17_thegeom_idx ON gbif_17 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_17 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_17_lon_idx ON gbif_17 USING btree(decimalLongitude);
 CREATE INDEX gbif_17_lat_idx ON gbif_17 USING btree(decimalLatitude);
 CLUSTER gbif_17 USING gbif_17_species_idx;
@@ -169,6 +187,7 @@ CREATE INDEX gbif_18_species_idx ON gbif_18 USING BTREE(species);
 CREATE INDEX gbif_18_genus_idx ON gbif_18 USING BTREE(genus);
 CREATE INDEX gbif_18_locality_trgm_idx ON gbif_18 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_18_thegeom_idx ON gbif_18 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_18 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_18_lon_idx ON gbif_18 USING btree(decimalLongitude);
 CREATE INDEX gbif_18_lat_idx ON gbif_18 USING btree(decimalLatitude);
 CLUSTER gbif_18 USING gbif_18_species_idx;
@@ -178,6 +197,7 @@ CREATE INDEX gbif_19_species_idx ON gbif_19 USING BTREE(species);
 CREATE INDEX gbif_19_genus_idx ON gbif_19 USING BTREE(genus);
 CREATE INDEX gbif_19_locality_trgm_idx ON gbif_19 USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_19_thegeom_idx ON gbif_19 USING gist (the_geom);
+CREATE INDEX gbif_00_thegeomw_idx ON gbif_19 USING gist (the_geom_webmercator);
 CREATE INDEX gbif_19_lon_idx ON gbif_19 USING btree(decimalLongitude);
 CREATE INDEX gbif_19_lat_idx ON gbif_19 USING btree(decimalLatitude);
 CLUSTER gbif_19 USING gbif_19_species_idx;
@@ -335,7 +355,7 @@ DROP TABLE IF EXISTS gbif_plants_museums CASCADE;
 
 CREATE TABLE gbif_plants_museums AS 
     SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_00
     WHERE
@@ -346,180 +366,171 @@ ALTER TABLE gbif_plants_museums ADD COLUMN ID SERIAL;
 
 --Insert
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
-    FROM
-        gbif_00
-    WHERE
-        phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
-
-INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
-    (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_01
     WHERE
         phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
 
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_02
     WHERE
         phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
 
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_03
     WHERE
         phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
 
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_04
     WHERE
         phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
 
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_05
     WHERE
         phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
 
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_06
     WHERE
         phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
 
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_07
     WHERE
         phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
 
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_08
     WHERE
         phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
 
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_09
     WHERE
         phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
 
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_10
     WHERE
         phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
 
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_11
     WHERE
         phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
 
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_12
     WHERE
         phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
 
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_13
     WHERE
         phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
 
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_14
     WHERE
         phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
 
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_15
     WHERE
         phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
 
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_16
     WHERE
         phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
 
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_17
     WHERE
         phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
 
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_18
     WHERE
         phylum = 'Tracheophyta' AND basisOfRecord = ANY('{PRESERVED_SPECIMEN,FOSSIL_SPECIMEN}'));
 
 INSERT INTO gbif_plants_museums  
-    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom)
+    (locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator)
     (SELECT
-        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom
+        locality, datasetKey, decimalLatitude, decimalLongitude, the_geom, the_geom_webmercator
     FROM
         gbif_19
     WHERE
@@ -541,4 +552,5 @@ WHERE
 
 CREATE INDEX gbif_plants_museums_locality_trgm_idx ON gbif_plants_museums USING gin (locality gin_trgm_ops);
 CREATE INDEX gbif_plants_museums_geom_idx ON gbif_plants_museums USING GIST(the_geom);
+CREATE INDEX gbif_plants_museums_geomw_idx ON gbif_plants_museums USING GIST(the_geom_webmercator);
 
