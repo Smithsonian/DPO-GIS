@@ -19,10 +19,10 @@ These scripts have been tested to load the current data dump to a PostgreSQL 10.
  * gadm
  * geonames
  * gnis
+ * osm
  * wdpa
  * wikidata
 
 Scripts still being tested:
-
- * osm
+ 
  * gbif

@@ -100,5 +100,5 @@ psql -U gisuser -h localhost gis -c "CREATE INDEX osm_centroid_idx ON osm USING 
 psql -U gisuser -h localhost gis -c "UPDATE data_sources SET is_online = 't', source_date = '$script_date' WHERE datasource_id = 'osm';"
 
 #Delete last tables
-#psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS planet_osm_polygon CASCADE;"
-#psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS planet_osm_ways CASCADE;"
+psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS planet_osm_polygon CASCADE;"
+psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS planet_osm_ways CASCADE;"
