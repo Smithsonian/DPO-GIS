@@ -304,7 +304,8 @@ create table gbif (
     species text,
     genericName text,
     acceptedScientificName text,
-    the_geom geometry
+    the_geom geometry,
+    the_geom_webmercator geometry
 );
 
 
