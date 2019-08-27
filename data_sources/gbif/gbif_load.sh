@@ -14,7 +14,7 @@ script_date=$(date +'%Y-%m-%d')
 
 #remove unused files
 rm meta.xml
-rm *.zip
+#rm *.zip
 rm verbatim.txt
 rm citations.txt
 rm multimedia.txt
@@ -25,7 +25,7 @@ sed -i 's.\\./.g' occurrence.txt
 
 #Break into smaller pieces, each with 5M rows
 split -l 5000000 occurrence.txt gbifdwc
-rm occurrence.txt
+#rm occurrence.txt
 
 #Remove first line (header) in the first file
 sed -i '1d' gbifdwcaa
@@ -44,10 +44,10 @@ for file in gbifdwc*; do
     psql -U gisuser -h localhost gis -c "\copy gbif_occ FROM '$file';"
     psql -U gisuser -h localhost gis -c "INSERT INTO gbif (gbifID, eventDate, basisOfRecord, occurrenceID, locationID, continent, waterBody, islandGroup, island, countryCode, stateProvince, county, municipality, locality, verbatimLocality, locationAccordingTo, locationRemarks, decimalLatitude, decimalLongitude, coordinateUncertaintyInMeters, coordinatePrecision, pointRadiusSpatialFit, georeferencedBy, georeferencedDate, georeferenceProtocol, georeferenceSources, georeferenceVerificationStatus, georeferenceRemarks, taxonConceptID, scientificName, higherClassification, kingdom, phylum, class, _order, family, genus, subgenus, specificEpithet, infraspecificEpithet, taxonRank, vernacularName, nomenclaturalCode, taxonomicStatus, nomenclaturalStatus, taxonRemarks, datasetKey, issue, hasGeospatialIssues, taxonKey, acceptedTaxonKey, species, genericName, acceptedScientificName, the_geom, the_geom_webmercator) (SELECT gbifID, eventDate, basisOfRecord, occurrenceID, locationID, continent, waterBody, islandGroup, island, countryCode, stateProvince, county, municipality, locality, verbatimLocality, locationAccordingTo, locationRemarks, decimalLatitude, decimalLongitude, coordinateUncertaintyInMeters, coordinatePrecision, pointRadiusSpatialFit, georeferencedBy, georeferencedDate, georeferenceProtocol, georeferenceSources, georeferenceVerificationStatus, georeferenceRemarks, taxonConceptID, scientificName, higherClassification, kingdom, phylum, class, _order, family, genus, subgenus, specificEpithet, infraspecificEpithet, taxonRank, vernacularName, nomenclaturalCode, taxonomicStatus, nomenclaturalStatus, taxonRemarks, datasetKey, issue, hasGeospatialIssues, taxonKey, acceptedTaxonKey, species, genericName, acceptedScientificName, ST_SETSRID(ST_POINT(decimalLongitude, decimalLatitude), 4326) as the_geom, ST_TRANSFORM(ST_SETSRID(ST_POINT(decimalLongitude, decimalLatitude), 4326), 3857) as the_geom_webmercator FROM gbif_occ WHERE locality != '' AND species != '' AND decimalLongitude != 0 AND decimalLatitude != 0 AND decimalLongitude IS NOT NULL AND decimalLatitude IS NOT NULL);"
     psql -U gisuser -h localhost gis -c "TRUNCATE gbif_occ;"
-    rm $file
+    #rm $file
 done
 
-rm gbifdwc*
+#rm gbifdwc*
 
 #Delete temp table
 psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS gbif_occ CASCADE;"
@@ -63,12 +63,12 @@ mv gbifdatasets.csv ../
 cd ../
 psql -U gisuser -h localhost gis < gbifdatasets_table.sql
 rm gbifdatasets.csv
-rm -r dataset
+#rm -r dataset
 
 #Extract doi from DwC download using xpath
 title_doi=`xpath -q -e '//dataset/title/text()' metadata.xml`
 
-rm metadata.xml
+#rm metadata.xml
 
 #Turn datasource online
 psql -U gisuser -h localhost gis -c "UPDATE data_sources SET is_online = 't', source_date = '$script_date', source_title = '$title_doi' WHERE datasource_id = 'gbif';"
