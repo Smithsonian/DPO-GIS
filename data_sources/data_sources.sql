@@ -167,3 +167,23 @@ VALUES
         'Every 3 months'
     );
 
+
+
+--bhl
+INSERT INTO data_sources (
+    datasource_id,
+    source_title,
+    source_url,
+    source_notes,
+    source_refresh
+)
+
+VALUES
+    (
+        'bhl',
+        'Biodiversity Heritage Library',
+        'https://www.biodiversitylibrary.org/',
+        'The Biodiversity Heritage Library improves research methodology by collaboratively making biodiversity literature openly available to the world as part of a global biodiversity community.',
+        'Every 3 months'
+    );
+

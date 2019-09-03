@@ -1,4 +1,6 @@
---Datasets
+DROP TABLE IF EXISTS gbif_datasets CASCADE;
+
+--Datasets table
 CREATE TABLE gbif_datasets (
     datasetKey uuid,
     title text,
