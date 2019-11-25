@@ -5,36 +5,34 @@
 # First, download the latest full DarwinCore data dump from:
 #    https://gbif.org
 # 
-# Then, unzip the files
-#    unzip 000##########.zip
+# Then, unzip the files that the script will use
+#    unzip 000##########.zip -x meta.xml verbatim.txt citations.txt multimedia.txt rights.txt
 # 
 
 #Today's date
 script_date=$(date +'%Y-%m-%d')
 
 #remove unused files
-rm meta.xml
-#rm *.zip
-rm verbatim.txt
-rm citations.txt
-rm multimedia.txt
-rm rights.txt
+# rm meta.xml
+# rm *.zip
+# rm verbatim.txt
+# rm citations.txt
+# rm multimedia.txt
+# rm rights.txt
 
 #Replace backslashes in some text fields
 sed -i 's.\\./.g' occurrence.txt
 
 #Break into smaller pieces, each with 5M rows
 split -l 5000000 occurrence.txt gbifdwc
-#rm occurrence.txt
+rm occurrence.txt
 
 #Remove first line (header) in the first file
 sed -i '1d' gbifdwcaa
 
-#Delete old tables
-psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS gbif_occ CASCADE;"
-psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS gbif CASCADE;"
 psql -U gisuser -h localhost gis -c "UPDATE data_sources SET is_online = 'f' WHERE datasource_id = 'gbif';"
 
+#Setup tables
 psql -U gisuser -h localhost gis < gbif_tables.sql
 
 
@@ -47,12 +45,8 @@ for file in gbifdwc*; do
     #rm $file
 done
 
-#rm gbifdwc*
-
 #Delete temp table
 psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS gbif_occ CASCADE;"
-
-
 
 #Extract dataset info
 cp gbifdatasets.py dataset/
@@ -62,8 +56,7 @@ mv gbifdatasets.csv ../
 cd ../
 psql -U gisuser -h localhost gis < gbifdatasets_table.sql
 rm gbifdatasets.csv
-#rm -r dataset
-
+rm -r dataset
 
 #Create indices, other post-insert cleanup
 psql -U gisuser -h localhost gis < post_insert_indices2.sql &
@@ -72,7 +65,7 @@ psql -U gisuser -h localhost gis < post_insert_indices4.sql &
 psql -U gisuser -h localhost gis < post_insert_indices.sql 
 
 #GBIF plant specimens
-psql -U gisuser -h localhost gis < gbif_plants_museums.sql
+#psql -U gisuser -h localhost gis < gbif_plants_museums.sql
 
 #Extract doi from DwC download using xpath
 title_doi=`xpath -q -e '//dataset/title/text()' metadata.xml`

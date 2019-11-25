@@ -1,4 +1,5 @@
 --Table to store the original contents of occurrence
+DROP TABLE IF EXISTS gbif_occ CASCADE;
 -- Dont log these tables to speed up inserts
 CREATE UNLOGGED TABLE gbif_occ(
     gbifID text,
@@ -239,20 +240,14 @@ CREATE UNLOGGED TABLE gbif_occ(
     lastCrawled text,
     repatriated text);
 
-ALTER TABLE gbif_occ SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-
-
 
 
 
 ----------------------------
 --Simplified table
 ----------------------------
-
-CREATE UNLOGGED TABLE gbif (
+DROP TABLE IF EXISTS gbif CASCADE;
+CREATE TABLE gbif (
     gbifID text,
     eventDate text,
     basisOfRecord text,
@@ -311,191 +306,105 @@ CREATE UNLOGGED TABLE gbif (
     the_geom_webmercator geometry
 );
 
-ALTER TABLE gbif_occ SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
 
 --GBIF partitioned by species
-CREATE UNLOGGED TABLE gbif_00 (
+CREATE TABLE gbif_00 (
     CHECK (species < 'Ancita crocogaster'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_00 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_01 (
+CREATE TABLE gbif_01 (
     CHECK (species >= 'Ancita crocogaster'::text
                     AND species < 'Austrolimnophila microsticta'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_01 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_02 (
+CREATE TABLE gbif_02 (
     CHECK (species >= 'Austrolimnophila microsticta'::text
                     AND species < 'Calothamnus arcuatus'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_02 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_03 (
+CREATE TABLE gbif_03 (
     CHECK (species >= 'Calothamnus arcuatus'::text
                     AND species < 'Circulus pseudopraecedens'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_03 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_04 (
+CREATE TABLE gbif_04 (
     CHECK (species >= 'Circulus pseudopraecedens'::text
                     AND species < 'Cucumis membranifolius'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_04 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_05 (
+CREATE TABLE gbif_05 (
     CHECK (species >= 'Cucumis membranifolius'::text
                     AND species < 'Dodecatheon vulgare'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_05 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_06 (
+CREATE TABLE gbif_06 (
     CHECK (species >= 'Dodecatheon vulgare'::text
                     AND species < 'Eugenia meridensis'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_06 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_07 (
+CREATE TABLE gbif_07 (
     CHECK (species >= 'Eugenia meridensis'::text
                     AND species < 'Gordionus conglomeratus'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_07 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_08 (
+CREATE TABLE gbif_08 (
     CHECK (species >= 'Gordionus conglomeratus'::text
                     AND species < 'Hydrophorus signifer'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_08 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_09 (
+CREATE TABLE gbif_09 (
     CHECK (species >= 'Hydrophorus signifer'::text
                     AND species < 'Lepanthes brachypogon'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_09 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_10 (
+CREATE TABLE gbif_10 (
     CHECK (species >= 'Lepanthes brachypogon'::text
                     AND species < 'Marrubium creticum'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_10 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_11 (
+CREATE TABLE gbif_11 (
     CHECK (species >= 'Marrubium creticum'::text
                     AND species < 'Myriactis longipedunculata'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_11 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_12 (
+CREATE TABLE gbif_12 (
     CHECK (species >= 'Myriactis longipedunculata'::text
                     AND species < 'Oriolus mellianus'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_12 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_13 (
+CREATE TABLE gbif_13 (
     CHECK (species >= 'Oriolus mellianus'::text
                     AND species < 'Peziza serratulae'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_13 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_14 (
+CREATE TABLE gbif_14 (
     CHECK (species >= 'Peziza serratulae'::text
                     AND species < 'Polyporus recurvus'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_14 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_15 (
+CREATE TABLE gbif_15 (
     CHECK (species >= 'Polyporus recurvus'::text
                     AND species < 'Reithrodontomys chrysopsis'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_15 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_16 (
+CREATE TABLE gbif_16 (
     CHECK (species >= 'Reithrodontomys chrysopsis'::text
                     AND species < 'Selenosporella falcata'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_16 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_17 (
+CREATE TABLE gbif_17 (
     CHECK (species >= 'Selenosporella falcata'::text
                     AND species < 'Suberea praetensa'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_17 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_18 (
+CREATE TABLE gbif_18 (
     CHECK (species >= 'Suberea praetensa'::text
                     AND species < 'Trichosalpinx lenticularis'::text)
 ) INHERITS (gbif);
 
-ALTER TABLE gbif_18 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-CREATE UNLOGGED TABLE gbif_19 (
+CREATE TABLE gbif_19 (
     CHECK (species >= 'Trichosalpinx lenticularis'::text)
 ) INHERITS (gbif);
-
-ALTER TABLE gbif_19 SET (
-  autovacuum_enabled = false, toast.autovacuum_enabled = false
-);
-
-
 
 
 
