@@ -168,6 +168,7 @@ if __name__ == '__main__':
     cur.execute("CREATE INDEX wikidata_descrip_id_idx ON wikidata_descrip USING btree (source_id);")
     cur.execute("CREATE INDEX wikidata_descrip_lang_idx ON wikidata_descrip USING btree (language);")
     cur.execute("UPDATE data_sources SET is_online = 'T', source_date = CURRENT_DATE WHERE datasource_id = 'wikidata'")
+    cur.execute("UPDATE data_sources SET no_features = w.no_feats FROM (select count(*) as no_feats from wikidata_names) w WHERE datasource_id = 'wikidata'")
     cur.close()
     conn.close()
 

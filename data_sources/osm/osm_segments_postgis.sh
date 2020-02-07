@@ -21,6 +21,7 @@ psql -U gisuser -h localhost gis -c "DROP TABLE planet_osm_roads CASCADE;"
 psql -U gisuser -h localhost gis -c "DROP TABLE planet_osm_ways CASCADE;"
 
 
+#Download files from http://download.geofabrik.de/
 
 #Load first, and smallest, download to prepare tables
 # antarctica-latest.osm.pbf

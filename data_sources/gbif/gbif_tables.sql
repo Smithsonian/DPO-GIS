@@ -251,6 +251,7 @@ CREATE TABLE gbif (
     gbifID text,
     eventDate text,
     basisOfRecord text,
+    recordedBy text,
     occurrenceID text,
     locationID text,
     continent text,
