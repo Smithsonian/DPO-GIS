@@ -145,7 +145,8 @@ DROP TABLE iucn_mammals CASCADE;
 
 --reptiles
 ----shp2pgsql -D -s 4326 -g the_geom REPTILES.shp iucn_reptiles | psql -h localhost -U gisuser -d gis
-INSERT INTO species_rangemaps 
+--UPDATE iucn_reptiles SET the_geom = st_makevalid(the_geom) WHERE st_isvalid(the_geom) = 'F';
+INSERT INTO iucn 
     (
         sciname,
         citation,
@@ -182,7 +183,8 @@ DROP TABLE iucn_reptiles CASCADE;
 
 --conus
 ----shp2pgsql -D -s 4326 -g the_geom CONUS.shp iucn_conus | psql -h localhost -U gisuser -d gis
-INSERT INTO species_rangemaps 
+UPDATE iucn_conus SET the_geom = st_makevalid(the_geom) WHERE st_isvalid(the_geom) = 'F';
+INSERT INTO iucn 
     (
         sciname,
         citation,
@@ -217,3 +219,48 @@ INSERT INTO species_rangemaps
             iucn_conus
         );
 DROP TABLE iucn_conus CASCADE;
+
+
+
+
+--mangroves
+----shp2pgsql -D -s 4326 -g the_geom MANGROVES.shp iucn_mangroves | psql -h localhost -U gisuser -d gis
+UPDATE iucn_mangroves SET the_geom = st_makevalid(the_geom) WHERE st_isvalid(the_geom) = 'F';
+INSERT INTO iucn 
+    (
+        sciname,
+        citation,
+        data_sources,
+        compiler,
+        version,
+        kingdom,
+        phylum,
+        class,
+        order_,
+        family,
+        genus,
+        redlist_cat,
+        the_geom
+        )
+    (
+        SELECT 
+            binomial,
+            citation,
+            source,
+            compiler,
+            yrcompiled,
+            kingdom,
+            phylum,
+            class,
+            order_,
+            family,
+            genus,
+            category,
+            the_geom
+        FROM 
+            iucn_mangroves
+        );
+DROP TABLE iucn_mangroves CASCADE;
+
+
+
