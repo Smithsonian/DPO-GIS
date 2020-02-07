@@ -948,6 +948,11 @@ server <- function(input, output, session) {
                         <dl class=\"dl-horizontal\">
                             <dt>Longitude</dt><dd>", click_lng, "</dd>
                             <dt>Latitude</dt><dd>", click_lat, "</dd>
+                            <dt>Uncertainty</dt><dd>", 
+                              sliderInput("integer", "Set the value in m:",
+                                          min = 1, max = 10000,
+                                          value = 500),
+                            "</dd>
                             </dl>
                   </div>
                   </div>"))
@@ -1148,7 +1153,8 @@ server <- function(input, output, session) {
                     addAwesomeMarkers(lng = as.numeric(click_lng), lat = as.numeric(click_lat), layerId = "newm", icon = icons)
                   
                   #HTML(paste0("Click on ", p$lng, "/", p$lat))
-                  HTML(paste0("<br><div class=\"panel panel-success\">
+                  tagList(
+                    HTML(paste0("<br><div class=\"panel panel-success\">
                     <div class=\"panel-heading\">
                     <h3 class=\"panel-title\">Click on Map</h3>
                     </div>
@@ -1157,8 +1163,10 @@ server <- function(input, output, session) {
                             <dt>Longitude</dt><dd>", click_lng, "</dd>
                             <dt>Latitude</dt><dd>", click_lat, "</dd>
                             </dl>
-                  </div>
-                  </div>"))
+                  </div>")), 
+                    uiOutput("uncert_slider"),
+                    HTML("</div>")
+                  )
                   
                 })
               })
@@ -1325,6 +1333,12 @@ server <- function(input, output, session) {
         }
       }
     }
+  })
+  
+  
+  #uncert_slider----
+  output$uncert_slider <- renderUI({
+    sliderInput("uncert_slider", "Uncertainty in m:", min = 5, max = 10000, value = 50)
   })
   
   
