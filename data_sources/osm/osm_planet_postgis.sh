@@ -20,32 +20,32 @@ script_date=$(date +'%Y-%m-%d')
 
 
 #Delete unused tables
-psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS planet_osm_line CASCADE;"
-psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS planet_osm_nodes CASCADE;"
-psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS planet_osm_point CASCADE;"
-psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS planet_osm_rels CASCADE;"
-psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS planet_osm_roads CASCADE;"
+psql -U gisuser -h localhost osm -c "DROP TABLE IF EXISTS planet_osm_line CASCADE;"
+psql -U gisuser -h localhost osm -c "DROP TABLE IF EXISTS planet_osm_nodes CASCADE;"
+psql -U gisuser -h localhost osm -c "DROP TABLE IF EXISTS planet_osm_point CASCADE;"
+psql -U gisuser -h localhost osm -c "DROP TABLE IF EXISTS planet_osm_rels CASCADE;"
+psql -U gisuser -h localhost osm -c "DROP TABLE IF EXISTS planet_osm_roads CASCADE;"
 
 #Clean up table
-psql -U gisuser -h localhost gis -c "DELETE FROM planet_osm_polygon WHERE name IS NULL;"
-psql -U gisuser -h localhost gis -c "VACUUM planet_osm_polygon;"
+psql -U gisuser -h localhost osm -c "DELETE FROM planet_osm_polygon WHERE name IS NULL;"
+psql -U gisuser -h localhost osm -c "VACUUM planet_osm_polygon;"
 
 #Turn datasource offline
-psql -U gisuser -h localhost gis -c "UPDATE data_sources SET is_online = 'f' WHERE datasource_id = 'osm';"
+psql -U gisuser -h localhost osm -c "UPDATE data_sources SET is_online = 'f' WHERE datasource_id = 'osm';"
 
 #Drop indices before bulk loading
-psql -U gisuser -h localhost gis -c "DROP INDEX IF EXISTS osm_name_idx;"
-psql -U gisuser -h localhost gis -c "DROP INDEX IF EXISTS osm_thegeom_idx;"
-psql -U gisuser -h localhost gis -c "DROP INDEX IF EXISTS osm_thegeomw_idx;"
-psql -U gisuser -h localhost gis -c "DROP INDEX IF EXISTS osm_centroid_idx;"
+psql -U gisuser -h localhost osm -c "DROP INDEX IF EXISTS osm_name_idx;"
+psql -U gisuser -h localhost osm -c "DROP INDEX IF EXISTS osm_thegeom_idx;"
+psql -U gisuser -h localhost osm -c "DROP INDEX IF EXISTS osm_thegeomw_idx;"
+psql -U gisuser -h localhost osm -c "DROP INDEX IF EXISTS osm_centroid_idx;"
 
 #Empty table
-psql -U gisuser -h localhost gis -c "TRUNCATE osm;"
-psql -U gisuser -h localhost gis -c "VACUUM osm;"
+psql -U gisuser -h localhost osm -c "TRUNCATE osm;"
+psql -U gisuser -h localhost osm -c "VACUUM osm;"
 
-psql -U gisuser -h localhost gis -c "UPDATE planet_osm_polygon SET osm_id = abs(osm_id) WHERE osm_id < 0;"
-psql -U gisuser -h localhost gis -c "CREATE INDEX planet_osm_polygon_osmid_idx ON planet_osm_polygon USING BTREE(osm_id);"
-psql -U gisuser -h localhost gis -c "CREATE INDEX planet_osm_ways_id_idx ON planet_osm_ways USING BTREE(id);"
+psql -U gisuser -h localhost osm -c "UPDATE planet_osm_polygon SET osm_id = abs(osm_id) WHERE osm_id < 0;"
+psql -U gisuser -h localhost osm -c "CREATE INDEX planet_osm_polygon_osmid_idx ON planet_osm_polygon USING BTREE(osm_id);"
+psql -U gisuser -h localhost osm -c "CREATE INDEX planet_osm_ways_id_idx ON planet_osm_ways USING BTREE(id);"
 
 
 #Columns to get the type
@@ -54,11 +54,11 @@ cols=(amenity barrier bridge building embankment harbour highway historic landus
 #Execute for each column
 for i in ${!cols[@]}; do
     echo "Working on column ${cols[$i]}..."
-    psql -U gisuser -h localhost gis -c "CREATE INDEX osmplanet_${cols[$i]}_idx ON planet_osm_polygon USING BTREE(${cols[$i]}) WHERE ${cols[$i]} IS NOT NULL;"
+    psql -U gisuser -h localhost osm -c "CREATE INDEX osmplanet_${cols[$i]}_idx ON planet_osm_polygon USING BTREE(${cols[$i]}) WHERE ${cols[$i]} IS NOT NULL;"
     #Loop in 100k blocks. Adjust max below as needed.
     for j in {0..10000000..100000}; do
         jj=`expr $j + 100000`
-        psql -U gisuser -h localhost gis -c "with data as ( 
+        psql -U gisuser -h localhost osm -c "with data as ( 
                                                 select 
                                                     osm_id as osm_id, 
                                                     name,
@@ -86,19 +86,19 @@ for i in ${!cols[@]}; do
                                                     planet_osm_ways r ON 
                                                     (d.osm_id = r.id);"
     done
-    psql -U gisuser -h localhost gis -c "DROP INDEX osmplanet_${cols[$i]}_idx;"
+    psql -U gisuser -h localhost osm -c "DROP INDEX osmplanet_${cols[$i]}_idx;"
 done
 
 
 #Recreate indices
-psql -U gisuser -h localhost gis -c "CREATE INDEX osm_name_idx ON osm USING BTREE(name);"
-psql -U gisuser -h localhost gis -c "CREATE INDEX osm_thegeom_idx ON osm USING GIST(the_geom);"
-psql -U gisuser -h localhost gis -c "CREATE INDEX osm_thegeomw_idx ON osm USING GIST(the_geom_webmercator);"
-psql -U gisuser -h localhost gis -c "CREATE INDEX osm_centroid_idx ON osm USING GIST(centroid);"
+psql -U gisuser -h localhost osm -c "CREATE INDEX osm_name_idx ON osm USING BTREE(name);"
+psql -U gisuser -h localhost osm -c "CREATE INDEX osm_thegeom_idx ON osm USING GIST(the_geom);"
+psql -U gisuser -h localhost osm -c "CREATE INDEX osm_thegeomw_idx ON osm USING GIST(the_geom_webmercator);"
+psql -U gisuser -h localhost osm -c "CREATE INDEX osm_centroid_idx ON osm USING GIST(centroid);"
 
 #Turn datasource online
-psql -U gisuser -h localhost gis -c "UPDATE data_sources SET is_online = 't', source_date = '$script_date' WHERE datasource_id = 'osm';"
+psql -U gisuser -h localhost osm -c "UPDATE data_sources SET is_online = 't', source_date = '$script_date' WHERE datasource_id = 'osm';"
 
 #Delete last tables
-psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS planet_osm_polygon CASCADE;"
-psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS planet_osm_ways CASCADE;"
+psql -U gisuser -h localhost osm -c "DROP TABLE IF EXISTS planet_osm_polygon CASCADE;"
+psql -U gisuser -h localhost osm -c "DROP TABLE IF EXISTS planet_osm_ways CASCADE;"
