@@ -5,7 +5,7 @@
 #
 
 
-# --amphibians
+# --
 # INSERT INTO data_sources (
 #     datasource_id,
 #     source_title,

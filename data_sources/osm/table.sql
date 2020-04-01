@@ -1,3 +1,6 @@
+CREATE EXTENSION IF NOT EXISTS hstore;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE osm (
     uid uuid DEFAULT uuid_generate_v4(),
     source_id text,
