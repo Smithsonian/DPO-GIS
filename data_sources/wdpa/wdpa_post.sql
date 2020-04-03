@@ -73,3 +73,36 @@ CREATE INDEX wdpa_points_the_geom_idx ON wdpa_points USING gist (the_geom);
 ALTER TABLE wdpa_points ADD COLUMN the_geom_webmercator geometry;
 UPDATE wdpa_points SET the_geom_webmercator = ST_transform(the_geom, 3857);
 CREATE INDEX wdpa_points_the_geomw_idx ON wdpa_points USING gist (the_geom_webmercator);
+
+
+
+ALTER TABLE wdpa_points ADD COLUMN gadm2 text;
+WITH data AS (
+    SELECT 
+        w.uid,
+        string_agg(g.name_2 || ', ' || g.name_1 || ', ' || g.name_0, '; ') as loc
+    FROM 
+        wdpa_points w,
+        gadm2 g
+    WHERE 
+        ST_INTERSECTS(w.the_geom, g.the_geom)
+    GROUP BY 
+        w.uid
+)
+UPDATE wdpa_points g SET gadm2 = d.loc FROM data d WHERE g.uid = d.uid;
+
+ALTER TABLE wdpa_polygons ADD COLUMN gadm2 text;
+WITH data AS (
+    SELECT 
+        w.uid,
+        string_agg(g.name_2 || ', ' || g.name_1 || ', ' || g.name_0, '; ') as loc
+    FROM 
+        wdpa_polygons w,
+        gadm2 g
+    WHERE 
+        ST_INTERSECTS(w.the_geom, g.the_geom)
+    GROUP BY 
+        w.uid
+)
+UPDATE wdpa_polygons g SET gadm2 = d.loc FROM data d WHERE g.uid = d.uid;
+
