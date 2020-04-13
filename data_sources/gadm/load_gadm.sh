@@ -93,6 +93,6 @@ rm gadm36_5.*
 #Add indices and run data checks
 psql -U gisuser -h localhost -p 5432 gis < gadm_post.sql
 
-psql -U gisuser -h localhost gis -c "WITH data AS (SELECT count(*) as no_features FROM gadm0  UNION SELECT count(*) as no_features FROM gadm1 UNION SELECT count(*) as no_features FROM gadm2 UNION SELECT count(*) as no_features FROM gadm3 UNION SELECT count(*) as no_features FROM gadm4 UNION SELECT count(*) as no_features FROM gadm5) UPDATE data_sources SET no_features = data.no_features FROM data WHERE datasource_id = 'gnis';"
+psql -U gisuser -h localhost gis -c "WITH data AS (SELECT count(*) as no_features FROM gadm0  UNION SELECT count(*) as no_features FROM gadm1 UNION SELECT count(*) as no_features FROM gadm2 UNION SELECT count(*) as no_features FROM gadm3 UNION SELECT count(*) as no_features FROM gadm4 UNION SELECT count(*) as no_features FROM gadm5) UPDATE data_sources SET no_features = data.no_features FROM data WHERE datasource_id = 'gadm';"
 
 psql -U gisuser -h localhost gis -c "UPDATE data_sources SET is_online = 't', source_date = '$script_date' WHERE datasource_id = 'gadm';"

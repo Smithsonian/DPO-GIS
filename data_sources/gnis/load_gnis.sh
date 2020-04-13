@@ -53,7 +53,7 @@ psql -U gisuser -h localhost gis < gnis_post.sql
 
 psql -U gisuser -h localhost gis -c "WITH data AS (SELECT count(*) as no_features FROM gnis) UPDATE data_sources SET no_features = data.no_features FROM data WHERE datasource_id = 'gnis';"
 
-psql -U gisuser -h localhost gis -c "UPDATE data_sources SET is_online = 't', source_date = '$script_date' WHERE datasource_id = 'gnis';"
+psql -U gisuser -h localhost gis -c "UPDATE data_sources SET is_online = 't', source_date = '$script_date', no_features = w.no_feats FROM (select count(*) as no_feats from gnis) w WHERE datasource_id = 'gnis';"
 
 rm *.zip
 rm *.txt

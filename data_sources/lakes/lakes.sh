@@ -5,7 +5,7 @@
 #
 
 
-# --amphibians
+# --
 # INSERT INTO data_sources (
 #     datasource_id,
 #     source_title,
@@ -46,7 +46,7 @@ shp2pgsql -D -s 4326 -g the_geom glwd_1.shp global_lakes | psql -h localhost -U 
 #indices and new columns
 psql -U gisuser -h localhost gis < lakes_post.sql
 
-psql -U gisuser -h localhost gis -c "UPDATE data_sources SET is_online = 't', source_date = '$script_date' WHERE datasource_id = 'global_lakes';"
+psql -U gisuser -h localhost gis -c "UPDATE data_sources SET is_online = 't', source_date = '$script_date', no_features = w.no_feats FROM (select count(*) as no_feats from global_lakes) w WHERE datasource_id = 'global_lakes';"
 
 
 #del files

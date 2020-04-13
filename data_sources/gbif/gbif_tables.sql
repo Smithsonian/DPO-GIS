@@ -234,11 +234,14 @@ CREATE UNLOGGED TABLE gbif_occ(
     species text,
     genericName text,
     acceptedScientificName text,
+    verbatimScientificName text,
     typifiedName text,
     protocol text,
     lastParsed text,
     lastCrawled text,
-    repatriated text);
+    repatriated text,
+    relativeOrganismQuantity text,
+    recordedByID text);
 
 
 

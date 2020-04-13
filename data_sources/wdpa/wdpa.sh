@@ -42,9 +42,11 @@ psql -U gisuser -h localhost gis < wdpa_polygons.sql
 #indices and new columns
 psql -U gisuser -h localhost gis < wdpa_post.sql
 
-psql -U gisuser -h localhost gis -c "UPDATE data_sources SET is_online = 't', source_date = '$script_date' WHERE datasource_id = 'wdpa_polygons';"
-psql -U gisuser -h localhost gis -c "UPDATE data_sources SET is_online = 't', source_date = '$script_date' WHERE datasource_id = 'wdpa_points';"
+psql -U gisuser -h localhost gis -c "UPDATE data_sources SET is_online = 't', source_date = '$script_date', no_features = w.no_feats FROM (select count(*) as no_feats from wdpa_polygons) w WHERE datasource_id = 'wdpa_polygons';"
+psql -U gisuser -h localhost gis -c "UPDATE data_sources SET is_online = 't', source_date = '$script_date', no_features = w.no_feats FROM (select count(*) as no_feats from wdpa_points) w WHERE datasource_id = 'wdpa_points';"
 
+
+UPDATE data_sources SET no_features = w.no_feats FROM (select count(*) as no_feats from wikidata_names) w WHERE datasource_id = 'wikidata'
 
 
 #del files
