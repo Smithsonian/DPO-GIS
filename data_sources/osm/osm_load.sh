@@ -13,6 +13,7 @@
 cols=(amenity barrier bridge building embankment harbour highway historic landuse leisure lock man_made military motorcar natural office place public_transport railway religion service shop sport surface toll tourism tunnel water waterway wetland wood)
 
 
+mkdir done -p
 
 #Download each file and load it to psql using osm2pgsql
 for j in *.pbf; do
@@ -56,6 +57,7 @@ for j in *.pbf; do
                                                     (d.osm_id = r.id);"
         psql -U gisuser -h localhost osm -c "DROP INDEX osmplanet_${cols[$i]}_idx;"
         done
+    mv $j done/
     done
 
 
