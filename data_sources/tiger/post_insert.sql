@@ -69,6 +69,7 @@ ALTER TABLE tiger_roads add column uid uuid DEFAULT uuid_generate_v4();
 CREATE INDEX tiger_roads_uid_idx ON tiger_roads USING btree(uid);
 
 --Add SRID
+UPDATE tiger_roads SET the_geom = ST_SETSRID(the_geom, 4326);
 UPDATE tiger_roads SET the_geom = ST_MAKEVALID(the_geom) WHERE ST_ISVALID(the_geom) = 'F';
 
 ALTER TABLE tiger_roads ADD COLUMN centroid geometry;
@@ -78,3 +79,72 @@ ALTER TABLE tiger_roads ADD COLUMN the_geom_webmercator geometry;
 UPDATE tiger_roads SET the_geom_webmercator = ST_transform(the_geom, 3857);
 CREATE INDEX tiger_roads_the_geomw_idx ON tiger_roads USING gist (the_geom_webmercator);
 
+
+
+
+
+--Add gamd2
+ALTER TABLE tiger_arealm ADD COLUMN gadm2 text;
+ALTER TABLE tiger_areawater ADD COLUMN gadm2 text;
+ALTER TABLE tiger_counties ADD COLUMN gadm2 text;
+ALTER TABLE tiger_roads ADD COLUMN gadm2 text;
+
+--tiger_arealm
+WITH data AS (
+    SELECT 
+        w.uid,
+        string_agg(g.name_2 || ', ' || g.name_1 || ', ' || g.name_0, '; ') as loc
+    FROM 
+        tiger_arealm w,
+        gadm2 g
+    WHERE 
+        ST_INTERSECTS(w.the_geom, g.the_geom)
+    GROUP BY 
+        w.uid
+)
+UPDATE tiger_arealm g SET gadm2 = d.loc FROM data d WHERE g.uid = d.uid;
+
+--tiger_areawater
+WITH data AS (
+    SELECT 
+        w.uid,
+        string_agg(g.name_2 || ', ' || g.name_1 || ', ' || g.name_0, '; ') as loc
+    FROM 
+        tiger_areawater w,
+        gadm2 g
+    WHERE 
+        ST_INTERSECTS(w.the_geom, g.the_geom)
+    GROUP BY 
+        w.uid
+)
+UPDATE tiger_areawater g SET gadm2 = d.loc FROM data d WHERE g.uid = d.uid;
+
+--tiger_counties
+WITH data AS (
+    SELECT 
+        w.uid,
+        string_agg(g.name_2 || ', ' || g.name_1 || ', ' || g.name_0, '; ') as loc
+    FROM 
+        tiger_counties w,
+        gadm2 g
+    WHERE 
+        ST_INTERSECTS(w.the_geom, g.the_geom)
+    GROUP BY 
+        w.uid
+)
+UPDATE tiger_counties g SET gadm2 = d.loc FROM data d WHERE g.uid = d.uid;
+
+--tiger_roads
+WITH data AS (
+    SELECT 
+        w.uid,
+        string_agg(g.name_2 || ', ' || g.name_1 || ', ' || g.name_0, '; ') as loc
+    FROM 
+        tiger_roads w,
+        gadm2 g
+    WHERE 
+        ST_INTERSECTS(w.the_geom, g.the_geom)
+    GROUP BY 
+        w.uid
+)
+UPDATE tiger_roads g SET gadm2 = d.loc FROM data d WHERE g.uid = d.uid;
