@@ -41,20 +41,25 @@ for j in *.pbf; do
                                                     name IS NOT NULL
                                             )
                                         INSERT INTO osm 
-                                            (source_id, name, type, attributes, centroid, the_geom, the_geom_webmercator, data_source) 
+                                            (source_id, name, type, attributes, centroid, the_geom, the_geom_webmercator, gadm2, country, data_source) 
                                             select 
                                                 d.osm_id::text, 
                                                 d.name, 
                                                 coalesce(replace(\"${cols[$i]}\", 'yes', NULL), \"${cols[$i]}\"),
                                                 tags::hstore,
                                                 st_centroid(st_multi(way)),
-                                                st_multi(way) as the_geom,
-                                                st_transform(st_multi(way), 3857) as the_geom_webmercator,
+                                                st_makevalid(st_multi(way)) as the_geom,
+                                                st_transform(st_makevalid(st_multi(way)), 3857) as the_geom_webmercator,
+                                                g.name_2 || ', ' || g.name_1 || ', ' || g.name_0 as loc
+                                                g.name_0 as name_0
                                                 '$j'
                                             from 
                                                 data d LEFT JOIN 
                                                     planet_osm_ways r ON 
-                                                    (d.osm_id = r.id);"
+                                                    (d.osm_id = r.id)
+                                                LEFT JOIN 
+                                                    gadm2 g ON 
+                                                    ST_INTERSECTS(st_makevalid(st_multi(way)), g.the_geom_simp);"
         psql -U gisuser -h localhost osm -c "DROP INDEX osmplanet_${cols[$i]}_idx;"
         done
     mv $j done/
