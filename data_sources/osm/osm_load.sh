@@ -50,8 +50,8 @@ for j in *.pbf; do
                                                 st_centroid(st_multi(way)),
                                                 st_makevalid(st_multi(way)) as the_geom,
                                                 st_transform(st_makevalid(st_multi(way)), 3857) as the_geom_webmercator,
-                                                g.name_2 || ', ' || g.name_1 || ', ' || g.name_0 as loc
-                                                g.name_0 as name_0
+                                                g.name_2 || ', ' || g.name_1 || ', ' || g.name_0 as loc,
+                                                g.name_0 as name_0,
                                                 '$j'
                                             from 
                                                 data d LEFT JOIN 
