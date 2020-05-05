@@ -247,7 +247,8 @@ server <- function(input, output, session) {
     req(species != "NULL")
     
     #records_query <- paste0("SELECT scientificname, species, max(gbifid)::text as gbifid, max(occurrenceid) as occurrenceid, stateprovince, countrycode, locality, count(*)::int as no_records FROM gbif_si WHERE gbifid IN (SELECT gbifid from gbif_si_matches WHERE species = '", species, "') GROUP BY scientificname, species, countrycode, stateprovince, locality ORDER BY no_records DESC")
-    records_query <- paste0("WITH data AS (SELECT scientificname, species, max(gbifid) as gbifid, max(occurrenceid) as occurrenceid, stateprovince, countrycode, locality, count(*)::int as no_records FROM gbif_si WHERE species = '", species, "' GROUP BY scientificname, species, countrycode, stateprovince, locality) SELECT * FROM data WHERE gbifid IN (SELECT gbifid FROM gbif_si_matches WHERE species = '", species, "') ORDER BY no_records DESC")
+    records_query <- paste0("WITH data AS (SELECT scientificname, species, max(gbifid) as gbifid, max(occurrenceid) as occurrenceid, null as eventdate, stateprovince, countrycode, locality, count(*)::int as no_records FROM gbif_si WHERE species = '", species, "' GROUP BY scientificname, species, countrycode, stateprovince, locality) SELECT * FROM data WHERE gbifid IN (SELECT gbifid FROM gbif_si_matches WHERE species = '", species, "') ORDER BY no_records DESC")
+    #records_query <- paste0("WITH data AS (SELECT scientificname, species, max(gbifid) as gbifid, max(occurrenceid) as occurrenceid, to_char(max(eventdate)::date, 'YYYY-MM-DD') as eventdate, stateprovince, countrycode, locality, count(*)::int as no_records FROM gbif_si WHERE species = '", species, "' GROUP BY scientificname, species, countrycode, stateprovince, locality) SELECT * FROM data WHERE gbifid IN (SELECT gbifid FROM gbif_si_matches WHERE species = '", species, "') ORDER BY no_records DESC")
     records <- dbGetQuery(db, records_query)
     
     session$userData$records <- records
@@ -301,6 +302,7 @@ server <- function(input, output, session) {
           <dt><strong>Located at</strong></dt><dd><strong>", located_at, "</strong></dd>
           <dt>No. of records</dt><dd>", this_row$no_records, "</dd>
           <dt>Sample Record</dt><dd><a href=\"https://www.gbif.org/occurrence/", this_row$gbifid, "\" target = _blank>", this_row$gbifid, "</a></dd>
+          <dt>Date</dt><dd>", this_row$eventdate, "</dd>
           <dt>Occurrence ID</dt><dd><a href=\"", this_row$occurrenceid, "\" target = _blank>", this_row$occurrenceid, "</a></dd>
         </dl>
     </div>
@@ -334,6 +336,7 @@ server <- function(input, output, session) {
                                   g.score,
                                   g.no_records,
                                   g.match,
+                                  null as eventdate,
                                   m.name_1 as name,
                                   g.located_at,
                                   m.engtype_1 as type,
@@ -355,6 +358,7 @@ server <- function(input, output, session) {
                                   g.score,
                                   g.no_records,
                                   g.match,
+                                  null as eventdate,
                                   m.name_2 as name,
                                   g.located_at,
                                   m.engtype_2 as type,
@@ -376,6 +380,7 @@ server <- function(input, output, session) {
                                   g.score,
                                   g.no_records,
                                   g.match,
+                                  null as eventdate,
                                   m.name_3 as name,
                                   g.located_at,
                                   m.engtype_3 as type,
@@ -397,6 +402,7 @@ server <- function(input, output, session) {
                                   g.score,
                                   g.no_records,
                                   g.match,
+                                  null as eventdate,
                                   m.name_4 as name,
                                   g.located_at,
                                   m.engtype_4 as type,
@@ -418,6 +424,7 @@ server <- function(input, output, session) {
                                   g.score,
                                   g.no_records,
                                   g.match,
+                                  null as eventdate,
                                   m.name_5 as name,
                                   g.located_at,
                                   m.engtype_5 as type,
@@ -439,6 +446,7 @@ server <- function(input, output, session) {
                                   g.score,
                                   g.no_records,
                                   g.match,
+                                  null as eventdate,
                                   m.name as name,
                                   g.located_at,
                                   m.desig_eng as type,
@@ -461,6 +469,7 @@ server <- function(input, output, session) {
                                   g.score,
                                   g.no_records,
                                   g.match,
+                                  null as eventdate,
                                   m.name as name,
                                   g.located_at,
                                   m.desig_eng as type,
@@ -483,6 +492,7 @@ server <- function(input, output, session) {
                                   g.score,
                                   g.no_records,
                                   g.match,
+                                  null as eventdate,
                                   m.name as name,
                                   g.located_at,
                                   mfc.name as type,
@@ -516,6 +526,7 @@ server <- function(input, output, session) {
                                   g.score,
                                   g.no_records,
                                   g.match,
+                                  null as eventdate,
                                   m.lake_name as name,
                                   m.gadm2 as located_at,
                                   m.type,
@@ -547,6 +558,7 @@ server <- function(input, output, session) {
                                   g.score,
                                   g.no_records,
                                   g.match,
+                                  null as eventdate,
                                   m.locality as name,
                                   g.located_at,
                                   'locality' as type,
@@ -577,6 +589,7 @@ server <- function(input, output, session) {
                                   score,
                                   no_records,
                                   match,
+                                  eventdate,
                                   name,
                                   located_at,
                                   UPPER(left(type, 1)) || right(type, -1) as type,
@@ -647,8 +660,8 @@ server <- function(input, output, session) {
          #if (dim(results)[1] > 0){
          results_table <- results %>% dplyr::select(-gbifid) %>% 
            dplyr::select(-match) %>% 
-           dplyr::select(-no_records)# %>% 
-           #dplyr::select(-source)
+           dplyr::select(-no_records) %>% 
+           dplyr::select(-eventdate)
          
          #Convert type to factor for filtering
          results$type <- as.factor(results$type)
@@ -949,12 +962,14 @@ server <- function(input, output, session) {
                             <dt>Longitude</dt><dd>", click_lng, "</dd>
                             <dt>Latitude</dt><dd>", click_lat, "</dd>
                             <dt>Uncertainty</dt><dd>", 
-                              sliderInput("integer", "Set the value in m:",
-                                          min = 1, max = 10000,
-                                          value = 500),
+                              
                             "</dd>
-                            </dl>
-                  </div>
+                            </dl>",
+                            sliderInput("integer", "Set the value in m:",
+                                        min = 10, max = 10000,
+                                        value = 500),
+                            actionButton("rec_save", "Save location for the records", style='font-size:80%'),
+                  "</div>
                   </div>"))
                 })
               })
@@ -978,6 +993,7 @@ server <- function(input, output, session) {
                             <dt>Locality uncertainty</dt><dd>", uncert, "</dd>
                             <dt>Source</dt><dd><a href=\"https://www.gbif.org/occurrence/", the_feature$gbifid, "\" target=_blank title=\"Open record in GBIF\">GBIF record (", the_feature$gbifid, ")</a></dd>
                             <dt>Dataset</dt><dd><a href=\"https://www.gbif.org/dataset/", the_feature$datasetkey, "\" target=_blank title=\"View dataset in GBIF\">", the_feature$dataset, "</a></dd>
+                            <dt>Date</dt><dd>", this_row$eventdate, "</dd>
                             <dt>Score</dt><dd>", this_row$score, "</dd>
                             <dt>No. of records</dt><dd>", this_row$no_records, "</dd>
                             <dt>Lat/Lon</dt><dd>", this_row$latitude, " / ", this_row$longitude, "</dd>
@@ -997,7 +1013,9 @@ server <- function(input, output, session) {
                 }
               }
               
-              html_to_print <- paste0(html_to_print, "</small></dd></dl></div></div>")
+              html_to_print <- paste0(html_to_print, "</small></dd></dl>", 
+                                      actionButton("gbif_rec_save", "Save location for the records", style='font-size:80%'),
+                                      "</div></div>")
               
               HTML(html_to_print)
             })
@@ -1162,9 +1180,17 @@ server <- function(input, output, session) {
                         <dl class=\"dl-horizontal\">
                             <dt>Longitude</dt><dd>", click_lng, "</dd>
                             <dt>Latitude</dt><dd>", click_lat, "</dd>
-                            </dl>
+                            </dl>", 
+                                
+                                "
                   </div>")), 
-                    uiOutput("uncert_slider"),
+                    #uiOutput("uncert_slider"),
+                    
+                    #uncert_slider----
+                    #output$uncert_slider <- renderUI({
+                      sliderInput("uncert_slider", "Uncertainty in m:", min = 5, max = 10000, value = 50),
+                    actionButton("gbif_rec_save", "Save location for the records", style='font-size:80%'),
+                    #})
                     HTML("</div>")
                   )
                   
@@ -1186,7 +1212,11 @@ server <- function(input, output, session) {
                         <dt>Score</dt><dd>", this_row$score, "</dd>
                       </dl>
                       ",
-                          actionButton("button", "Save location for the records", style='font-size:80%'),
+                          actionButton("button", "Georeference using point and uncertainty", style='font-size:80%'),
+                          "<br><br>",
+                          actionButton("button", "Georeference using polygon", style='font-size:80%'),
+                          "<br><br>",
+                          actionButton("button", "Georeference using both", style='font-size:80%'),
                       "
                 </div>
                 </div>"))
@@ -1336,10 +1366,6 @@ server <- function(input, output, session) {
   })
   
   
-  #uncert_slider----
-  output$uncert_slider <- renderUI({
-    sliderInput("uncert_slider", "Uncertainty in m:", min = 5, max = 10000, value = 50)
-  })
   
   
   # footer ----

@@ -146,3 +146,33 @@ ALTER TABLE gadm5 ADD COLUMN the_geom_webmercator geometry;
 UPDATE gadm5 SET the_geom_webmercator = st_transform(the_geom, 3857);
 CREATE INDEX gadm5_tgeomw_idx ON gadm5 USING GIST(the_geom_webmercator);
 
+
+
+
+
+--Remove polygons with only numbers in name
+delete from gadm1 where uid in 
+    (select uid from gadm1  where name_1 ~ '^[0-9\.]+$');
+delete from gadm2 where uid in 
+    (select uid from gadm2  where name_2 ~ '^[0-9\.]+$');
+delete from gadm3 where uid in 
+    (select uid from gadm3  where name_3 ~ '^[0-9\.]+$');
+delete from gadm4 where uid in 
+    (select uid from gadm4  where name_4 ~ '^[0-9\.]+$');
+delete from gadm5 where uid in 
+    (select uid from gadm5  where name_5 ~ '^[0-9\.]+$');
+
+
+
+--Remove where name is too short (<4 chars)
+delete from gadm1 where uid in 
+    (select uid from gadm1 where CHAR_LENGTH(name_1) < 4);
+delete from gadm2 where uid in 
+    (select uid from gadm2 where CHAR_LENGTH(name_2) < 4);
+delete from gadm3 where uid in 
+    (select uid from gadm3 where CHAR_LENGTH(name_3) < 4);
+delete from gadm4 where uid in 
+    (select uid from gadm4 where CHAR_LENGTH(name_4) < 4);
+delete from gadm5 where uid in 
+    (select uid from gadm5 where CHAR_LENGTH(name_5) < 4);
+
