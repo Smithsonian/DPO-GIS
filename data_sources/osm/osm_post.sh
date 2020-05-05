@@ -1,9 +1,5 @@
 #!/bin/bash
 #
-#Get the OSM extracts from geofabrik.de and refresh the PostGIS database
-# using osm2pgsql (https://wiki.openstreetmap.org/wiki/Osm2pgsql)
-# 
-
 
 #Today's date
 script_date=$(date +'%Y-%m-%d')
@@ -20,7 +16,6 @@ psql -U gisuser -h localhost osm -c "DROP TABLE IF EXISTS planet_osm_ways CASCAD
 #Move table between dbs
 psql -U gisuser -h localhost gis -c "DROP TABLE IF EXISTS osm CASCADE;"
 pg_dump -U gisuser -h localhost -t osm osm | psql -U gisuser -h localhost gis
-
 
 
 
