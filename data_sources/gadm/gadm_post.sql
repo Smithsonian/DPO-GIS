@@ -176,3 +176,78 @@ delete from gadm4 where uid in
 delete from gadm5 where uid in 
     (select uid from gadm5 where CHAR_LENGTH(name_5) < 4);
 
+
+
+
+--view
+CREATE VIEW gadm AS
+    SELECT
+        name_0 as name,
+        'gadm0' as layer,
+        'country' as type,
+        uid,
+        null AS located_at,
+        the_geom
+    FROM
+        gadm0
+
+    UNION
+
+    SELECT
+        name_1 as name,
+        'gadm1' as layer,
+        engtype_1 as type,
+        uid,
+        name_0 AS located_at,
+        the_geom
+    FROM
+        gadm1
+
+    UNION
+
+    SELECT
+        name_2 as name,
+        'gadm2' as layer,
+        engtype_2 as type,
+        uid,
+        name_1 || ', ' || name_0 AS located_at,
+        the_geom
+    FROM
+        gadm2
+
+    UNION
+
+    SELECT
+        name_3 as name,
+        'gadm3' as layer,
+        engtype_3 as type,
+        uid,
+        name_2 || ', ' || name_1 || ', ' || name_0 AS located_at,
+        the_geom
+    FROM
+        gadm3
+
+    UNION
+
+    SELECT
+        name_4 as name,
+        'gadm4' as layer,
+        engtype_4 as type,
+        uid,
+        name_3 || ', ' || name_2 || ', ' || name_1 || ', ' || name_0 AS located_at,
+        the_geom
+    FROM
+        gadm4
+
+    UNION
+
+    SELECT
+        name_5 as name,
+        'gadm5' as layer,
+        engtype_5 as type,
+        uid,
+        name_4 || ', ' || name_3 || ', ' || name_2 || ', ' || name_1 || ', ' || name_0 AS located_at,
+        the_geom
+    FROM
+        gadm5
+;
