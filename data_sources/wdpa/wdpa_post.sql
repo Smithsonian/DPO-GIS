@@ -33,14 +33,14 @@ CREATE INDEX wdpa_polygons_name_trgm_idx ON wdpa_polygons USING gin (name gin_tr
 
 ALTER TABLE wdpa_polygons ADD COLUMN centroid geometry;
 UPDATE wdpa_polygons SET centroid = ST_Centroid(the_geom);
-
+/*
 ALTER TABLE wdpa_polygons ADD COLUMN the_geom_simp geometry;
 UPDATE wdpa_polygons SET the_geom_simp = ST_Simplify(the_geom, 0.05);
 CREATE INDEX wdpa_polygons_the_geom_simp_idx ON wdpa_polygons USING gist (the_geom_simp);
 
 ALTER TABLE wdpa_polygons ADD COLUMN the_geom_webmercator geometry;
 UPDATE wdpa_polygons SET the_geom_webmercator = ST_transform(the_geom, 3857);
-CREATE INDEX wdpa_polygons_the_geomw_idx ON wdpa_polygons USING gist (the_geom_webmercator);
+CREATE INDEX wdpa_polygons_the_geomw_idx ON wdpa_polygons USING gist (the_geom_webmercator);*/
 
 
 /*ALTER TABLE wdpa_polygons ADD COLUMN bbox geometry;
@@ -70,10 +70,10 @@ ALTER TABLE wdpa_points DROP COLUMN the_geom CASCADE;
 ALTER TABLE wdpa_points RENAME COLUMN the_geom_p TO the_geom;
 CREATE INDEX wdpa_points_the_geom_idx ON wdpa_points USING gist (the_geom);
 
-ALTER TABLE wdpa_points ADD COLUMN the_geom_webmercator geometry;
+/*ALTER TABLE wdpa_points ADD COLUMN the_geom_webmercator geometry;
 UPDATE wdpa_points SET the_geom_webmercator = ST_transform(the_geom, 3857);
 CREATE INDEX wdpa_points_the_geomw_idx ON wdpa_points USING gist (the_geom_webmercator);
-
+*/
 
 
 ALTER TABLE wdpa_points ADD COLUMN gadm2 text;
@@ -92,7 +92,7 @@ WITH data AS (
 UPDATE wdpa_points g SET gadm2 = d.loc FROM data d WHERE g.uid = d.uid;
 
 ALTER TABLE wdpa_polygons ADD COLUMN gadm2 text;
-WITH data AS (
+/*WITH data AS (
     SELECT 
         w.uid,
         string_agg(g.name_2 || ', ' || g.name_1 || ', ' || g.name_0, '; ') as loc
@@ -104,7 +104,7 @@ WITH data AS (
     GROUP BY 
         w.uid
 )
-UPDATE wdpa_polygons g SET gadm2 = d.loc FROM data d WHERE g.uid = d.uid;
+UPDATE wdpa_polygons g SET gadm2 = d.loc FROM data d WHERE g.uid = d.uid;*/
 
 CREATE INDEX wdpa_polygons_gadm2_idx ON wdpa_polygons USING gin (gadm2 gin_trgm_ops);
 CREATE INDEX wdpa_points_gadm2_idx ON wdpa_points USING gin (gadm2 gin_trgm_ops);

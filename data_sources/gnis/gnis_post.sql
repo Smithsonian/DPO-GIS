@@ -20,5 +20,5 @@ ALTER TABLE gnis ADD COLUMN gadm2 text;
 
 UPDATE gnis geo SET gadm2 = g.name_2 || ', ' || g.name_1 || ', ' || g.name_0 FROM gadm2 g WHERE ST_INTERSECTS(geo.the_geom, g.the_geom);
 
-#CREATE INDEX gnis_gadm2_idx ON gnis USING BTREE(gadm2);
+--CREATE INDEX gnis_gadm2_idx ON gnis USING BTREE(gadm2);
 CREATE INDEX gnis_gadm2g_idx ON gnis USING gin (gadm2 gin_trgm_ops);

@@ -51,7 +51,7 @@ CREATE INDEX geonames_alt_geonameid_idx ON geonames_alt USING BTREE(geonameid);
 CREATE INDEX geonames_fc_idx ON geonames USING BTREE(feature_code);
 
 --geom_w
-ALTER TABLE geonames ADD COLUMN the_geom_webmercator geometry;
+/*ALTER TABLE geonames ADD COLUMN the_geom_webmercator geometry;
 
 update geonames set the_geom_webmercator = st_transform(ST_SETSRID(ST_POINT(0.000001, -89.999999), 4326), 3857) where latitude = -90 and longitude = 0;
 update geonames set the_geom_webmercator = st_transform(ST_SETSRID(ST_POINT(0.000001, 89.999999), 4326), 3857) where latitude = 90 and longitude = 0;
@@ -59,7 +59,7 @@ update geonames set the_geom_webmercator = st_transform(ST_SETSRID(ST_POINT(179.
 update geonames set the_geom_webmercator = st_transform(ST_SETSRID(ST_POINT(179.999999, -89.999999), 4326), 3857) where latitude = -90 and longitude = 180;
 UPDATE geonames SET the_geom_webmercator = st_transform(the_geom, 3857) WHERE the_geom_webmercator IS NULL;
 CREATE INDEX geonames_tgeomw_idx ON geonames USING GIST(the_geom_webmercator);
-
+*/
 
 
 --Add gadm2 intersection
@@ -67,4 +67,4 @@ ALTER TABLE geonames ADD COLUMN gadm2 text;
 
 UPDATE geonames geo SET gadm2 = g.name_2 || ', ' || g.name_1 || ', ' || g.name_0 FROM gadm2 g WHERE ST_INTERSECTS(geo.the_geom, g.the_geom);
 
-CREATE INDEX geonames_gadm2_idx ON geonames USING BTREE(gadm2);
+CREATE INDEX geonames_gadm2_idx ON geonames USING gin (gadm2 gin_trgm_ops);

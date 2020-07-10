@@ -70,23 +70,32 @@ CREATE INDEX geonames_gadm2_idx ON topo_map_vector_elev USING BTREE(gadm2);
 
 
 --VIEW
-CREATE MATERIALIZED VIEW topo_map_vector AS 
+DROP MATERIALIZED VIEW topo_map_polygons;
+CREATE MATERIALIZED VIEW topo_map_polygons AS 
     SELECT 
-        uid, gaz_name AS name, gadm2 AS stateprovince, gaz_featur AS type, 'topo_map_vector' AS data_source, the_geom 
-    FROM 
-        topo_map_vector_derivednames 
-    UNION 
-    SELECT 
-        uid, county_nam AS name, gadm2 AS stateprovince, 'county' AS type, 'topo_map_vector' AS data_source, the_geom
+        gid as source_id, uid, county_nam AS name, gadm2 AS stateprovince, 'county' AS type, 'topo_map_polygons' AS data_source, the_geom
     FROM 
         topo_map_vector_county 
     UNION 
     SELECT 
-        uid, gnis_name AS name, gadm2 AS stateprovince, NULL AS type, 'topo_map_vector' AS data_source, the_geom 
+        gid as source_id, uid, gnis_name AS name, gadm2 AS stateprovince, NULL AS type, 'topo_map_polygons' AS data_source, the_geom 
     FROM 
         topo_map_vector_waterbody;
 
-CREATE INDEX topo_map_vector_v_geom_idx ON topo_map_vector USING GIST(the_geom);
-CREATE INDEX topo_map_vector_v_name_idx ON topo_map_vector USING BTREE(name);
-CREATE INDEX topo_map_vector_v_uid_idx ON topo_map_vector USING BTREE(uid);
+CREATE INDEX topo_map_vector_v_geom_idx ON topo_map_polygons USING GIST(the_geom);
+CREATE INDEX topo_map_vector_v_name_idx ON topo_map_polygons USING BTREE(name);
+CREATE INDEX topo_map_vector_v_uid_idx ON topo_map_polygons USING BTREE(uid);
+CREATE INDEX topo_map_vector_v_source_id_idx ON topo_map_polygons USING BTREE(source_id);
 
+
+DROP MATERIALIZED VIEW topo_map_points;
+CREATE MATERIALIZED VIEW topo_map_points AS 
+    SELECT 
+        gid as source_id, uid, gaz_name AS name, gadm2 AS stateprovince, gaz_featur AS type, 'topo_map_points' AS data_source, (ST_Dump(the_geom)).geom as the_geom 
+    FROM 
+        topo_map_vector_derivednames;
+
+CREATE INDEX topo_map_pts_v_geom_idx ON topo_map_points USING GIST(the_geom);
+CREATE INDEX topo_map_pts_v_name_idx ON topo_map_points USING BTREE(name);
+CREATE INDEX topo_map_pts_v_uid_idx ON topo_map_points USING BTREE(uid);
+CREATE INDEX topo_map_pts_v_source_id_idx ON topo_map_points USING BTREE(source_id);

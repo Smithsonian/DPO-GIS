@@ -72,7 +72,7 @@ if __name__ == '__main__':
     conn = psycopg2.connect(host = settings.host, database = settings.db, user = settings.user)
     conn.autocommit = True
     cur = conn.cursor()
-    cur.execute("UPDATE data_sources SET is_online = 'F' WHERE datasource_id = 'wikidata'")
+    cur.execute("UPDATE data_sources SET is_online = 'f' WHERE datasource_id = 'wikidata'")
     #Delete indices for bulk loading
     cur.execute("DROP INDEX IF EXISTS wikidata_records_id_idx")
     cur.execute("DROP INDEX IF EXISTS wikidata_records_name_idx")

@@ -54,13 +54,13 @@ CREATE INDEX gns_uid_idx ON gns USING BTREE(uid);
 
 
 --Add webmercator
-ALTER TABLE gns ADD COLUMN the_geom_webmercator geometry(POINT, 3857);
+/*ALTER TABLE gns ADD COLUMN the_geom_webmercator geometry(POINT, 3857);
 UPDATE gns SET the_geom_webmercator = ST_Transform(the_geom, 3857);
-CREATE INDEX gns_thegeomw_idx ON gns USING GIST(the_geom_webmercator);
+CREATE INDEX gns_thegeomw_idx ON gns USING GIST(the_geom_webmercator);*/
 
 --Add gadm2 intersection
 ALTER TABLE gns ADD COLUMN gadm2 text;
 
 UPDATE gns geo SET gadm2 = g.name_2 || ', ' || g.name_1 || ', ' || g.name_0 FROM gadm2 g WHERE ST_INTERSECTS(geo.the_geom, g.the_geom);
 
-CREATE INDEX gns_gadm2_idx ON gns USING BTREE(gadm2);
+CREATE INDEX gns_gin_gadm2_idx ON gns USING gin(gadm2 gin_trgm_ops);
