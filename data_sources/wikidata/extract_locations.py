@@ -9,6 +9,7 @@
 
 import json, pydash, os, sys, psycopg2, bz2
 from pathlib import Path
+from tqdm import tqdm
 #To measure how long it takes
 import time
 
@@ -95,7 +96,7 @@ if __name__ == '__main__':
     cur.execute("DELETE FROM wikidata_records")
     cur.execute("VACUUM wikidata_records")
     #Process wikidata dump
-    for record in wikidata(args.dumpfile):
+    for record in tqdm(wikidata(args.dumpfile)):
         # only extract items with geographical coordinates (P625)
         if pydash.has(record, 'claims.P625'):
             #Exclude astronomical locations
@@ -104,18 +105,18 @@ if __name__ == '__main__':
                 # a few exceptions, 20 as of June 2019: https://www.wikidata.org/wiki/Property_talk:P376
                 # https://petscan.wmflabs.org/?psid=5844683
                 # SELECT ?item WHERE {?item wdt:P376 wd:Q2 . }
-                print('Skipping P376')
+                #print('Skipping P376')
                 continue
             else:
-                print('i = {} item {} started!\n'. format(i, record['id']))
+                #print('i = {} item {} started!\n'. format(i, record['id']))
                 latitude = pydash.get(record, 'claims.P625[0].mainsnak.datavalue.value.latitude')
                 longitude = pydash.get(record, 'claims.P625[0].mainsnak.datavalue.value.longitude')
                 #Ignore empty or invalid coords
                 if latitude == None or longitude == None:
-                    print('Skipping entry without coords')
+                    #print('Skipping entry without coords')
                     continue
                 if abs(latitude) > 90 or abs(longitude) > 180:
-                    print('Skipping entry with invalid coords')
+                    #print('Skipping entry with invalid coords')
                     continue
                 english_label = pydash.get(record, 'labels.en.value')
                 item_id = pydash.get(record, 'id')
@@ -148,22 +149,23 @@ if __name__ == '__main__':
                 else:
                     longitude_w = longitude
                 cur.execute("""
-                    INSERT INTO wikidata_records (source_id, type, name, latitude, longitude, the_geom, the_geom_webmercator)
-                    VALUES (%(id)s, %(type)s, %(name)s, %(latitude)s, %(longitude)s, ST_SETSRID(ST_POINT(%(longitude)s, %(latitude)s), 4326),
-                        ST_TRANSFORM(ST_SETSRID(ST_POINT(%(longitude_w)s, %(latitude_w)s), 4326), 3857));
+                    INSERT INTO wikidata_records (source_id, type, name, latitude, longitude, the_geom, gadm2)
+                    (SELECT %(id)s, %(type)s, %(name)s, %(latitude)s, %(longitude)s, ST_SETSRID(ST_POINT(%(longitude)s, %(latitude)s), 4326), g.name_2 || ', ' || g.name_1 || ', ' || g.name_0 FROM gadm2 g WHERE ST_INTERSECTS(g.the_geom, ST_SETSRID(ST_POINT(%(longitude)s, %(latitude)s), 4326)));
                     """,
                     {'id': item_id, 'type': item_type, 'name': english_label, 'latitude': latitude, 'longitude': longitude, 'latitude_w': latitude_w, 'longitude_w': longitude_w})
                 i += 1
     cur.execute("CREATE INDEX wikidata_records_id_idx ON wikidata_records USING BTREE(source_id);")
+    cur.execute("CREATE INDEX wikidata_records_uid_idx ON wikidata_records USING BTREE(uid);")
     cur.execute("CREATE INDEX wikidata_records_name_idx ON wikidata_records USING btree (name);")
     cur.execute("CREATE INDEX wikidata_records_name_trgm_idx ON wikidata_records USING gin (name gin_trgm_ops);")
+    cur.execute("CREATE INDEX wikidata_records_gadm2_idx ON wikidata_records USING gin (gadm2 gin_trgm_ops);")
     cur.execute("CREATE INDEX wikidata_records_the_geom_idx ON wikidata_records USING gist(the_geom);")
-    cur.execute("CREATE INDEX wikidata_records_the_geomw_idx ON wikidata_records USING gist(the_geom_webmercator);")
-    cur.execute("CREATE INDEX wikidata_names_name_idx ON wikidata_names USING btree (name);")
+    #cur.execute("CREATE INDEX wikidata_records_the_geomw_idx ON wikidata_records USING gist(the_geom_webmercator);")
+    #cur.execute("CREATE INDEX wikidata_names_name_idx ON wikidata_names USING btree (name);")
     cur.execute("CREATE INDEX wikidata_names_name_trgm_idx ON wikidata_names USING gin (name gin_trgm_ops);")
     cur.execute("CREATE INDEX wikidata_names_id_idx ON wikidata_names USING btree (source_id);")
     cur.execute("CREATE INDEX wikidata_names_lang_idx ON wikidata_names USING btree (language);")
-    cur.execute("CREATE INDEX wikidata_descrip_descr_idx ON wikidata_descrip USING btree (description);")
+    #cur.execute("CREATE INDEX wikidata_descrip_descr_idx ON wikidata_descrip USING btree (description);")
     cur.execute("CREATE INDEX wikidata_descrip_descr_trgm_idx ON wikidata_descrip USING gin (description gin_trgm_ops);")
     cur.execute("CREATE INDEX wikidata_descrip_id_idx ON wikidata_descrip USING btree (source_id);")
     cur.execute("CREATE INDEX wikidata_descrip_lang_idx ON wikidata_descrip USING btree (language);")

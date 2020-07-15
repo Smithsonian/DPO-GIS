@@ -42,7 +42,7 @@ psql -U gisuser -h localhost gis -c "VACUUM usgs_nhd_waterbody;"
 for i in /home/villanueval/H/Data/SpatialData/NHD_H_National_GDB/wget/*.zip; do
     unzip $i Shape/NHDWaterbody*
     for j in Shape/NHDWaterbody*; do
-        shp2pgsql -g geom -s 4269:4326 -a $j usgs_nhd_waterbody > usgs_nhd_waterbody.sql
+        shp2pgsql -g the_geom -s 4269:4326 -a $j usgs_nhd_waterbody > usgs_nhd_waterbody.sql
         sed -i 's/,ST_Transform(/,ST_Force2D(ST_Transform(/g' usgs_nhd_waterbody.sql
         sed -i 's/ 4326));/ 4326)));/g' usgs_nhd_waterbody.sql    
         psql -U gisuser -h localhost gis < usgs_nhd_waterbody.sql
