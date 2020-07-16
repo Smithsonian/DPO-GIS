@@ -1,4 +1,0 @@
-#Postgres creds
-host = "localhost"
-db = ""
-user = ""
