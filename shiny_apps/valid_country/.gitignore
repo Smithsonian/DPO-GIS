@@ -1,0 +1,6 @@
+*.Rproj
+.Rhistory
+tests
+results
+logs
+.Rproj.user

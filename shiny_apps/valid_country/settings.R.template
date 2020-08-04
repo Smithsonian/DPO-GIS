@@ -1,9 +1,4 @@
 no_cores <- 4
 
-api_search_url <- "http://[SERVER]/api/[API_VER]/search?string="
-api_searchfuzzy_url <- "http://[SERVER]/api/[API_VER]/fuzzysearch?string="
-api_detail_url <- "http://[SERVER]/api/[API_VER]/get_geom?uid="
-apikey <- "[APIKEY]"
-
-api_host <- "[SERVER]"
-api_ver <- "[API_VER]"
+api_url <- "https://"
+apikey <- ""

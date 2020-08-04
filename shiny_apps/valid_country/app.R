@@ -11,8 +11,8 @@ library(openxlsx)
 
 
 #Settings----
-app_name <- "Country-Coordinates Check Service"
-app_ver <- "0.1.1"
+app_name <- "Valid Country Check"
+app_ver <- "0.2.0"
 github_link <- "https://github.com/Smithsonian/DPO-GIS"
 
 options(stringsAsFactors = FALSE)
@@ -43,17 +43,21 @@ ui <- fluidPage(
      column(width = 7,
            DT::dataTableOutput("ccv_table"),
            br(),
-           uiOutput("downloadData")
+           br()
      ),
      column(width = 5, 
             uiOutput("ccv_mapgiven"),
             br(),
-            uiOutput("ccv_mapfixed")
+            uiOutput("ccv_mapfixed"),
+            br(),
+            uiOutput("downloadData"),
+            br(),
+            br()
      )
   ),
   #hr(),
   #footer ----
-  HTML(paste0("<br><br><br><div class=\"footer navbar-fixed-bottom\" style = \"background: white;\"><br><p>&nbsp;&nbsp;<a href=\"http://dpo.si.edu\" target = _blank><img src=\"dpologo.jpg\"></a> | ", app_name, ", ver. ", app_ver, " | <a href=\"", github_link, "\" target = _blank>Source code</a></p></div>"))
+  HTML(paste0("<br><br><br><br><div class=\"footer navbar-fixed-bottom\" style = \"background: white;\"><br><p>&nbsp;&nbsp;<a href=\"http://dpo.si.edu\" target = _blank><img src=\"DPO_logo_300.png\"></a> | ", app_name, ", ver. ", app_ver, " | <a href=\"", github_link, "\" target = _blank>Source code</a></p></div>"))
   
 )
 
@@ -67,7 +71,6 @@ server <- function(input, output, session) {
   dir.create('logs', showWarnings = FALSE)
   flog.logger("spatial", INFO, appender=appender.file(logfile))
   
-  
   #main----
   output$main <- renderUI({
     if (is.null(input$ccv_csvinput)){
@@ -78,7 +81,8 @@ server <- function(input, output, session) {
               <li>decimallatitude</li>
               <li>decimallongitude</li>
               <li>country</li>
-             </ul><p>The coordinates must be in decimal format and using the WGS84 datum. Filesize is limited to 100MB."),
+             </ul><p>The coordinates must be in decimal format and using the WGS84 datum. Filesize is limited to 100MB.</p>
+             <p>The unit information will used only for generating statistics about this tool.</p>"),
         heading = "Welcome",
         status = "primary"
       )
@@ -91,6 +95,7 @@ server <- function(input, output, session) {
   output$ccv_uploadcsv <- renderUI({
     if (is.null(input$ccv_csvinput)){
       tagList(
+        textInput("unit", "SI Unit and Department"),
         selectInput("countrycode", "Countries are coded using:",
                     list(`ISO-2 character` = "iso2c",
                          `ISO-3 character` = "iso3c",
@@ -116,7 +121,9 @@ server <- function(input, output, session) {
     req(input$ccv_csvinput)
     country_code <- input$countrycode
       
-    ccv_csvdata <<- read_inputfile(input$ccv_csvinput$name, input$ccv_csvinput$datapath)
+    #Save unit
+    flog.info("Unit: %s", input$unit, name='spatial')
+    ccv_csvdata <- read_inputfile(input$ccv_csvinput$name, input$ccv_csvinput$datapath)
     
     results_table <- data.frame(matrix(nrow = 0, ncol = 8, data = NA))
     
@@ -126,19 +133,22 @@ server <- function(input, output, session) {
     on.exit(progress0$close())
     
     no_rows <- dim(ccv_csvdata)[1]
-    
+    flog.info("no_rows: %s", no_rows, name='spatial')
     #Parallel
     
     # Initiate cluster
     cl <- makeCluster(no_cores)
     
     #Export data to cluster
-    clusterExport(cl=cl, varlist=c("ccv_csvdata", "countrycheck", "api_host", "api_ver", "query_api", "api_search_gadm", "app_api_key", "api_search_nearest"), envir=environment())
+    clusterExport(cl=cl, varlist=c("ccv_csvdata", "countrycheck", "query_api", "api_url", "apikey", "country_code"), envir=environment())
     
     countrycheck_data <- function(i){
       library(jsonlite)
       library(futile.logger)
       library(countrycode)
+      
+      #Settings
+      source("settings.R")
       
       res <- countrycheck(as.integer(ccv_csvdata$id[i]), ccv_csvdata$decimallatitude[i], ccv_csvdata$decimallongitude[i], ccv_csvdata$country[i], country_code, apikey)
       return(res)
@@ -184,16 +194,27 @@ server <- function(input, output, session) {
       
       progress0$set(value = progress_val, message = "Saving results")
       
-      results_table <- rbind(results_table, cbind(results_p[[i]]$id, results_p[[i]]$country, results_p[[i]]$longitude, results_p[[i]]$latitude, results_p[[i]]$country_match, results_p[[i]]$longitude_match, results_p[[i]]$latitude_match, results_p[[i]]$note))
+      results_table <- rbind(results_table, cbind(results_p[[i]]$id, results_p[[i]]$country, results_p[[i]]$decimallongitude, results_p[[i]]$decimallatitude, results_p[[i]]$country_match, results_p[[i]]$longitude_match, results_p[[i]]$latitude_match, results_p[[i]]$note))
     }
     
     progress0$set(message = "Done!", value = 1)
     
-    names(results_table) <- c('id', 'country', 'longitude', 'latitude', 'matched_country', 'matched_longitude', 'matched_latitude', 'notes')
+    names(results_table) <- c('id', 'country', 'decimallongitude', 'decimallatitude', 'matched_country', 'matched_longitude', 'matched_latitude', 'notes')
     
-    results_table_2fix <<- dplyr::filter(results_table, notes != 'Coordinates match')
+    session$userData$results_table <- results_table
     
-    results_table1 <- dplyr::select(results_table_2fix, -notes)
+    write.csv(results_table, paste0("results/results_countrycheck_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv"), quote = TRUE, na = "", row.names = FALSE)
+    
+    results_table_2fix <- dplyr::distinct(dplyr::filter(results_table, notes != 'Coordinates match'))
+    # results_table_2fix <- results_table %>% 
+    #         dplyr::filter(notes != 'Coordinates match') %>% 
+    #         dplyr::distinct()
+
+    session$userData$results_table_2fix <- results_table_2fix
+    
+    #results_table1 <- dplyr::select(results_table_2fix, -notes)
+    results_table1 <- dplyr::select(results_table_2fix, -matched_longitude)
+    results_table1 <- dplyr::select(results_table1, -matched_latitude)
     
     no_errors <- dim(results_table1)[1]
     
@@ -207,7 +228,7 @@ server <- function(input, output, session) {
                   rownames = FALSE,
                   selection = 'single',
                   caption = paste0('Found ', no_errors, ' rows with problems (of ', no_rows, ', ', round((no_errors/no_rows) * 100, 2), '%). Click on a record to see the details.')) %>%
-      formatStyle(c('id', 'country', 'latitude', 'longitude'),  color = 'grey')
+      formatStyle(c('id', 'country', 'decimallatitude', 'decimallongitude'),  color = 'grey')
   })
   
   
@@ -220,10 +241,12 @@ server <- function(input, output, session) {
     #Print selected row
     print(input$ccv_table_rows_selected)
     
+    results_table_2fix <- session$userData$results_table_2fix
+    
     this_row <- results_table_2fix[input$ccv_table_rows_selected, ]
     
-    lng_dd <- this_row$longitude
-    lat_dd <- this_row$latitude
+    lng_dd <- this_row$decimallongitude
+    lat_dd <- this_row$decimallatitude
     notes <- this_row$notes
     
     if (!is.na(lng_dd) && !is.na(lat_dd)){
@@ -240,10 +263,12 @@ server <- function(input, output, session) {
   output$ccv_leafletgiven <- renderLeaflet({
     req(input$ccv_table_rows_selected)
     
+    results_table_2fix <- session$userData$results_table_2fix
+    
     this_row <- results_table_2fix[input$ccv_table_rows_selected, ]
     
-    lng_dd <- as.numeric(this_row$longitude)
-    lat_dd <- as.numeric(this_row$latitude)
+    lng_dd <- as.numeric(this_row$decimallongitude)
+    lat_dd <- as.numeric(this_row$decimallatitude)
 
     if (!is.na(lng_dd) && !is.na(lat_dd)){
       leaflet() %>%
@@ -264,12 +289,14 @@ server <- function(input, output, session) {
   output$ccv_mapfixed <- renderUI({
     req(input$ccv_table_rows_selected)
     
+    results_table_2fix <- session$userData$results_table_2fix
+    
     this_row <- results_table_2fix[input$ccv_table_rows_selected, ]
     print(this_row)
     lng_dd <- this_row$matched_longitude
     lat_dd <- this_row$matched_latitude
-    lng_dd1 <- this_row$longitude
-    lat_dd1 <- this_row$latitude
+    lng_dd1 <- this_row$decimallongitude
+    lat_dd1 <- this_row$decimallatitude
     
     if (!is.na(lng_dd) && !is.na(lat_dd) && (lng_dd != lng_dd1 || lat_dd != lat_dd1)){
       
@@ -288,8 +315,8 @@ server <- function(input, output, session) {
     
     lng_dd <- this_row$matched_longitude
     lat_dd <- this_row$matched_latitude
-    lng_dd1 <- this_row$longitude
-    lat_dd1 <- this_row$latitude
+    lng_dd1 <- this_row$decimallongitude
+    lat_dd1 <- this_row$decimallatitude
     
     if (!is.na(lng_dd) && !is.na(lat_dd) && (lng_dd != lng_dd1 || lat_dd != lat_dd1)){
       leaflet() %>%
@@ -307,12 +334,13 @@ server <- function(input, output, session) {
   #download CSV----
   #Download CSV
   output$downloadcsv1 <- downloadHandler(
+    
     #Downloadable csv of results
     filename = function() {
-      paste("results_countrycheck_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv", sep = "")
+      paste0("results_countrycheck_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".csv")
     },
     content = function(file) {
-      write.csv(results_table, file, quote = TRUE, na = "", row.names = FALSE)
+      write.csv(session$userData$results_table, file, quote = TRUE, na = "", row.names = FALSE)
     }
   )
   
@@ -323,7 +351,7 @@ server <- function(input, output, session) {
     filename = function(){paste0("results_countrycheck_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".xlsx")},
     
     content = function(file){
-      WriteXLS::WriteXLS(x = results_table, ExcelFileName = file, AdjWidth = TRUE, BoldHeaderRow = TRUE, Encoding = "UTF-8", row.names = FALSE, FreezeRow = 1, SheetNames = c("results_aat"))
+      WriteXLS::WriteXLS(x = session$userData$results_table, ExcelFileName = file, AdjWidth = TRUE, BoldHeaderRow = TRUE, Encoding = "UTF-8", row.names = FALSE, FreezeRow = 1, SheetNames = c("results_aat"))
     },
     contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
   )
@@ -333,23 +361,26 @@ server <- function(input, output, session) {
   output$downloadData <- renderUI({
     req(input$ccv_csvinput)
     #req(results)
-    
-    shinyWidgets::panel(
-      HTML("<p>Download the results as a Comma Separated Values file (.csv) or an Excel file (.xlsx).</p><p>The results file contains the same columns as the input file, untouched, with four additional columns:</p>"),
-      HTML('<dl class="dl-horizontal">
-                <dt>matched_country</dt><dd>The country the corrected coordinated matched</dd>
-                <dt>matched_longitude</dt><dd> The corrected longitude</dd>
-                <dt>matched_latitude</dt><dd>The corrected latitude</dd>
-                <dt>notes</dt><dd>The specific issue with the coordinates</dd></dl>'),
-      br(),
-      HTML("<div class=\"btn-toolbar\">"),
-      downloadButton("downloadcsv1", "CSV (.csv)", class = "btn-success"),
-      downloadButton("downloadcsv2", "Excel (.xlsx)", class = "btn-primary"),
-      HTML("</div>"),
-      br(),
-      br(),
-      heading = "Download Results",
-      status = "primary"
+    tagList(
+      shinyWidgets::panel(
+        HTML("<p>Download the results as a Comma Separated Values file (.csv) or an Excel file (.xlsx).</p><p>The results file contains these columns:</p>"),
+        HTML('<dl class="dl-horizontal">
+                  <dt>id</dt><dd>The original ID in the input file</dd>
+                  <dt>country</dt><dd>Country value in the input file</dd>
+                  <dt>decimallongitude</dt><dd>The original decimallongitude in the input file</dd>
+                  <dt>decimallatitude</dt><dd>The original decimallatitude in the input file</dd>
+                  <dt>matched_country</dt><dd>The country the corrected coordinated matched (if any)</dd>
+                  <dt>matched_longitude</dt><dd> The corrected longitude (if applicable)</dd>
+                  <dt>matched_latitude</dt><dd>The corrected latitude (if applicable)</dd>
+                  <dt>notes</dt><dd>The specific issue with the coordinates</dd></dl>'),
+        br(),
+        HTML("<div class=\"btn-toolbar\">"),
+        downloadButton("downloadcsv1", "CSV (.csv)", class = "btn-success"),
+        downloadButton("downloadcsv2", "Excel (.xlsx)", class = "btn-primary"),
+        HTML("</div>"),
+        heading = "Download Results",
+        status = "primary"
+      )
     )
   })
 }
