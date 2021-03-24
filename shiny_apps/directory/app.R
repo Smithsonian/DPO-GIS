@@ -34,7 +34,8 @@ server <- function(input, output, session) {
       shinyWidgets::panel(
         HTML("<p>These services are currently available:</p>"),
         HTML("<ul>
-              <li><a href=\"/villanueval/valid_country/\">Valid Country Check</a> - Service to verify if a set of coordinates match the country in the row</li>
+              <li><a href=\"/villanueval/valid_country/\">Valid Country Check</a> - Service to verify if a set of coordinates match the country in the row.</li>
+              <li><a href=\"/villanueval/historical_counties/\">Historical Counties Check</a> - Service to verify if a set of coordinates and year match the historical county in the United States and what the current county+state is.</li>
               </ul>"),
         heading = "DPO GIS Services",
         status = "primary"
